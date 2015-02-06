@@ -1,2 +1,9 @@
-# Langtons-ant
-WikiWidget for the Langton's ant article in Wikipedia
+LangtonsAnt
+===========
+WikiWidget for the Wikipedia article about Langton's ant
+
+Bugs
+----
+
+Tasks
+-----
