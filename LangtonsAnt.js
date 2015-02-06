@@ -16,8 +16,8 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 		menu.append( playPauseButton )
 			.append( nextButton )
 			.append( resetButton )
-			//.append( zoomOutButton )
-			//.append( zoomInButton )
+			.append( zoomOutButton )
+			.append( zoomInButton )
 			.append( generationCounter );
 		wrapper.html( canvas ).append( menu );
 
@@ -163,8 +163,8 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 
 		click: function ( event ) {
 			var board = LangtonsAnt.board;
-			var x = Math.floor( ( event.pageX - board.canvas.parentElement.offsetLeft ) / board.cellsSize );
-			var y = Math.floor( ( event.pageY - board.canvas.parentElement.offsetTop ) / board.cellsSize );
+			var x = Math.floor( ( event.pageX - board.canvas.parentElement.offsetLeft ) / board.cellSize );
+			var y = Math.floor( ( event.pageY - board.canvas.parentElement.offsetTop ) / board.cellSize );
 			this.setX( x );
 			this.setY( y );
 			this[ this.action ](); //Calls the function stored in 'action'
@@ -189,33 +189,29 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 	board: {
 
 		canvas: {},
-
 		context: {},
 
-		x: 0,
-
-		y: 0,
-
 		width: 400,
-
 		height: 300,
 
-		cellsSize: 4,
+		topLeftX: 0,
+		topLeftY: 0,
 
-		xCells: 40,
+		cellSize: 4,
 
-		yCells: 30,
+		xCells: 100,
+		yCells: 75,
 
 		color: 'black',
 
 		cells: [],
 
 		getXcells: function () {
-			return Math.floor( this.width / this.cellsSize );
+			return Math.floor( this.width / this.cellSize );
 		},
 
 		getYcells: function () {
-			return Math.floor( this.height / this.cellsSize );
+			return Math.floor( this.height / this.cellSize );
 		},
 
 		setCanvas: function ( value ) {
@@ -242,17 +238,10 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			return this;
 		},
 
-		setCellsSize: function ( value ) {
-			this.cellsSize = parseInt( value );
-			if ( this.cellsSize > 100 ) {
-				this.cellsSize = 100;
-			}
-			if ( this.cellsSize < 1 ) {
-				this.cellsSize = 1;
-			}
+		setCellSize: function ( value ) {
+			this.cellSize = parseInt( value );
 			this.xCells = this.getXcells();
 			this.yCells = this.getYcells();
-			this.refill();
 			return this;
 		},
 
@@ -269,21 +258,24 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			return this
 		},
 
-		zoom: function ( x, y, z ) {
-			if ( z === 'in' ) {
-				this.setCellsSize( this.cellsSize * 2 );
+		zoomIn: function () {
+			if ( this.cellSize === 32 ) {
+				return this;
 			}
-			if ( z === 'out' ) {
-				this.setCellsSize( this.cellsSize / 2 );
+			this.setCellSize( this.cellSize * 2 );
+			this.topLeftX += Math.floor( this.xCells / 2 );
+			this.topLeftY += Math.floor( this.yCells / 2 );
+			this.refill();
+			return this;
+		},
+
+		zoomOut: function () {
+			if ( this.cellSize === 1 ) {
+				return this;
 			}
-			var centerX = Math.floor( this.xCells / 2 );
-			var centerY = Math.floor( this.yCells / 2 );
-			var diffX = centerX - x;
-			var diffY = centerY - y;
-			for ( var i = 0; i < this.cells.length; i++ ) {
-				this.cells[ i ].x += diffX, this.cells[ i ].y += diffY;
-			}
-			ant.x += diffX, ant.y += diffY;
+			this.setCellSize( this.cellSize / 2 );
+			this.topLeftX -= Math.floor( this.xCells / 4 );
+			this.topLeftY -= Math.floor( this.yCells / 4 );
 			this.refill();
 			return this;
 		},
@@ -292,7 +284,7 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			for ( var i = 0; i < this.cells.length; i++ ) {
 				this.fillCell( this.cells[ i ].x, this.cells[ i ].y, this.cells[ i ].color );
 			}
-			this.fillCell( ant.x, ant.y, ant.color );
+			this.fillCell( LangtonsAnt.ant.x, LangtonsAnt.ant.y, LangtonsAnt.ant.color );
 			return this;
 		},
 
@@ -316,18 +308,26 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 
 		fillCell: function ( x, y, color ) {
 			if ( x < 0 || y < 0 || x > this.xCells || y > this.yCells ) {
-				return this //If the cell is outside the board, exit
+				//return this //If the cell is outside the board, exit
 			}
+			var rectX = ( x - this.topLeftX ) * this.cellSize;
+			var rectY = ( y - this.topLeftY ) * this.cellSize;
+			var rectW = this.cellSize;
+			var rectH = this.cellSize;
 			this.context.fillStyle = color;
-			this.context.fillRect( x * this.cellsSize, y * this.cellsSize, this.cellsSize, this.cellsSize );
+			this.context.fillRect( rectX, rectY, rectW, rectH );
 			return this;
 		},
 
 		clearCell: function ( x, y ) {
 			if ( x < 0 || y < 0 || x > this.xCells || y > this.yCells ) {
-				return this; //If the cell is outside the board, exit
+				//return this; //If the cell is outside the board, exit
 			}
-			this.context.clearRect( x * this.cellsSize, y * this.cellsSize, this.cellsSize, this.cellsSize );
+			var rectX = ( x - this.topLeftX ) * this.cellSize;
+			var rectY = ( y - this.topLeftY ) * this.cellSize;
+			var rectW = this.cellSize;
+			var rectH = this.cellSize;
+			this.context.clearRect( rectX, rectY, rectW, rectH );
 			return this;
 		},
 
