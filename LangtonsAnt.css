@@ -3,14 +3,10 @@
 	width: 400px; height: 300px;
 }
 
-#LangtonsAntMenu button {
-	background: #a7dcff;
-	border: none;
+#LangtonsAntMenu .button {
 	cursor: pointer;
-	font: inherit;
-	margin-right: 5px;
-	outline: none;
-	padding: 5px 10px;
+	display: inline;
+	margin-right: 20px;
 }
 
 #LangtonsAntGenerationCounter {

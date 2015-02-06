@@ -7,15 +7,46 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 		var wrapper = $( '#WikiWidget' );
 		var canvas = $( '<canvas/>' ).attr( 'id', 'LangtonsAntCanvas' );
 		var menu = $( '<div/>' ).attr( 'id', 'LangtonsAntMenu' );
-		var playPauseButton = $( '<button/>' ).attr( 'id', 'LangtonsAntPlayPauseButton' ).text( 'Play' );
-		var nextButton = $( '<button/>' ).attr( 'id', 'LangtonsAntNextButton' ).text( 'Next' );
-		var resetButton = $( '<button/>' ).attr( 'id', 'LangtonsAntResetButton' ).text( 'Reset' );
-		var zoomOutButton = $( '<button/>' ).attr( 'id', 'LangtonsAntZoomOutButton' ).text( 'Zoom out' );
-		var zoomInButton = $( '<button/>' ).attr( 'id', 'LangtonsAntZoomInButton' ).text( 'Zoom in' );
-		var generationCounter = $( '<span/>' ).attr( 'id', 'LangtonsAntGenerationCounter' ).text( 'Generation 0' );
-		menu.append( playPauseButton )
+
+		var resetButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntResetButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b4/LangtonsAntResetButton.png' )
+			.attr( 'alt', 'Reset' );
+		var playButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntPlayButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/4/4c/LangtonsAntPlayButton.png' )
+			.attr( 'alt', 'Play' );
+		var pauseButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntPauseButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/4/49/LangtonsAntPauseButton.png' )
+			.attr( 'alt', 'Pause' )
+			.hide(); // Start hidden
+		var nextButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntNextButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/5/57/LangtonsAntNextButton.png' )
+			.attr( 'alt', 'Next' );
+		var zoomOutButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntZoomOutButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/6b/LangtonsAntZoomOutButton.png' )
+			.attr( 'alt', 'Zoom out' );
+		var zoomInButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntZoomInButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/1/13/LangtonsAntZoomInButton.png' )
+			.attr( 'alt', 'Zoom in' );
+		var generationCounter = $( '<div/>' )
+			.attr( 'id', 'LangtonsAntGenerationCounter' )
+			.text( 'Generation 0' );
+
+		menu.append( resetButton )
+			.append( playButton )
+			.append( pauseButton )
 			.append( nextButton )
-			.append( resetButton )
 			.append( zoomOutButton )
 			.append( zoomInButton )
 			.append( generationCounter );
@@ -31,8 +62,11 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 		canvas.click( function ( event ) {
 			//LangtonsAnt.mouse.click( event );
 		});
-		playPauseButton.click( function () {
-			LangtonsAnt.game.playPause();
+		playButton.click( function () {
+			LangtonsAnt.game.play();
+		});
+		pauseButton.click( function () {
+			LangtonsAnt.game.pause();
 		});
 		nextButton.click( function () {
 			LangtonsAnt.game.next();
@@ -103,19 +137,19 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			}
 			var interval = 1000 / this.speed;
 			this.playing = setInterval( this.next, interval ); //The interval's id is stored in the playing property
-			$( '#LangtonsAntPlayPauseButton' ).text( 'Pause' );
+			$( '#LangtonsAntPlayButton' ).hide();
+			$( '#LangtonsAntPauseButton' ).show();
 			return this;
 		},
 
 		pause: function () {
+			if ( !this.playing ) {
+				return this; //If the game is already paused, exit
+			}
 			clearInterval( this.playing );
 			this.playing = false;
-			$( '#LangtonsAntPlayPauseButton' ).text( 'Play' );
-			return this;
-		},
-
-		playPause: function () {
-			this.playing ? this.pause() : this.play();
+			$( '#LangtonsAntPlayButton' ).show();
+			$( '#LangtonsAntPauseButton' ).hide();
 			return this;
 		},
 
