@@ -12,40 +12,60 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntResetButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b4/LangtonsAntResetButton.png' )
+			.attr( 'title', 'Reset' )
 			.attr( 'alt', 'Reset' );
+		var slowerButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntSlowerButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b1/LangtonsAntSlowerButton.png' )
+			.attr( 'title', 'Slower' )
+			.attr( 'alt', 'Slower' );
 		var playButton = $( '<img/>' )
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntPlayButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/4/4c/LangtonsAntPlayButton.png' )
+			.attr( 'title', 'Play' )
 			.attr( 'alt', 'Play' );
 		var pauseButton = $( '<img/>' )
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntPauseButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/4/49/LangtonsAntPauseButton.png' )
+			.attr( 'title', 'Pause' )
 			.attr( 'alt', 'Pause' )
 			.hide(); // Start hidden
+		var fasterButton = $( '<img/>' )
+			.addClass( 'button' )
+			.attr( 'id', 'LangtonsAntFasterButton' )
+			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b6/LangtonsAntFasterButton.png' )
+			.attr( 'title', 'Faster' )
+			.attr( 'alt', 'Faster' );
 		var nextButton = $( '<img/>' )
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntNextButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/5/57/LangtonsAntNextButton.png' )
+			.attr( 'title', 'Next' )
 			.attr( 'alt', 'Next' );
 		var zoomOutButton = $( '<img/>' )
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntZoomOutButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/6b/LangtonsAntZoomOutButton.png' )
+			.attr( 'title', 'Zoom out' )
 			.attr( 'alt', 'Zoom out' );
 		var zoomInButton = $( '<img/>' )
 			.addClass( 'button' )
 			.attr( 'id', 'LangtonsAntZoomInButton' )
 			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/1/13/LangtonsAntZoomInButton.png' )
+			.attr( 'title', 'Zoom in' )
 			.attr( 'alt', 'Zoom in' );
-		var generationCounter = $( '<div/>' )
+		var generationCounter = $( '<span/>' )
 			.attr( 'id', 'LangtonsAntGenerationCounter' )
 			.text( 'Generation 0' );
 
 		menu.append( resetButton )
+			.append( slowerButton )
 			.append( playButton )
 			.append( pauseButton )
+			.append( fasterButton )
 			.append( nextButton )
 			.append( zoomOutButton )
 			.append( zoomInButton )
@@ -62,17 +82,23 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 		canvas.click( function ( event ) {
 			//LangtonsAnt.mouse.click( event );
 		});
+		resetButton.click( function () {
+			LangtonsAnt.game.reset();
+		});
+		slowerButton.click( function () {
+			LangtonsAnt.game.slower();
+		});
 		playButton.click( function () {
 			LangtonsAnt.game.play();
 		});
 		pauseButton.click( function () {
 			LangtonsAnt.game.pause();
 		});
+		fasterButton.click( function () {
+			LangtonsAnt.game.faster();
+		});
 		nextButton.click( function () {
 			LangtonsAnt.game.next();
-		});
-		resetButton.click( function () {
-			LangtonsAnt.game.reset();
 		});
 		zoomOutButton.click( function () {
 			LangtonsAnt.board.zoomOut();
@@ -115,11 +141,33 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 		},
 
 		getGeneration: function () {
-			return this.generation
+			return this.generation;
 		},
 
 		getSpeed: function () {
-			return this.speed
+			return this.speed;
+		},
+
+		slower: function () {
+			var speed = this.getSpeed();
+			speed = Math.floor( speed / 2 );
+			if ( speed < 1 ) {
+				speed = 1;
+			}
+			this.setSpeed( speed );
+			this.pause().play()
+			return this;
+		},
+
+		faster: function () {
+			var speed = this.getSpeed();
+			speed = Math.floor( speed * 2 );
+			if ( speed > 1000 ) {
+				speed = 1000;
+			}
+			this.setSpeed( speed );
+			this.pause().play()
+			return this;
 		},
 
 		next: function () {
@@ -158,6 +206,8 @@ var LangtonsAnt = window.LangtonsAnt = $.extend({
 			var board = LangtonsAnt.board;
 			ant.x = Math.floor( board.xCells / 2 );
 			ant.y = Math.floor( board.yCells / 2 );
+			board.topLeftX = 0;
+			board.topLeftY = 0;
 			board.cells = [];
 			board.clear();
 			board.fillCell( ant.x, ant.y, ant.color );
