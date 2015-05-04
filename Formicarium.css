@@ -1,0 +1,42 @@
+#Formicarium {
+	position: relative;
+}
+
+#FormicariumCanvas {
+	background: black;
+	display: block;
+	width: 400px; height: 300px;
+}
+
+#FormicariumMenu {
+	margin: 5px 0;
+}
+
+#FormicariumMenu .button {
+	cursor: pointer;
+	display: inline;
+	margin-right: 10px;
+	padding: 5px;
+}
+
+#FormicariumMenu .tooltip {
+	background: black;
+	color: white;
+	font-size: small;
+	opacity: .7;
+	padding: 5px;
+	pointer-events: none;
+	position: absolute;
+	bottom: -30px;
+}
+
+#FormicariumMenu .button.active {
+	background: #a7dcff;
+}
+
+#FormicariumGenerationCounter {
+	color: white;
+	margin: 0 5px;
+	position: absolute;
+	top: 0; right: 0;
+}
