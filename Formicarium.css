@@ -19,6 +19,10 @@
 	padding: 5px;
 }
 
+#FormicariumMenu .button.active {
+	background: #a7dcff;
+}
+
 #FormicariumMenu .tooltip {
 	background: black;
 	color: white;
@@ -28,10 +32,6 @@
 	pointer-events: none;
 	position: absolute;
 	bottom: -30px;
-}
-
-#FormicariumMenu .button.active {
-	background: #a7dcff;
 }
 
 #FormicariumGenerationCounter {

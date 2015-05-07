@@ -3,79 +3,8 @@
 var Formicarium = window.Formicarium = $.extend({
 
 	init: function () {
-		// Create the GUI
-		var wikiwidget = $( '#WikiWidget' );
-		var wrapper = $( '<div/>' ).attr( 'id', 'Formicarium' );
-		var canvas = $( '<canvas/>' ).attr( 'id', 'FormicariumCanvas' );
-		var menu = $( '<div/>' ).attr( 'id', 'FormicariumMenu' );
-
-		var resetButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumResetButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png' )
-			.attr( 'title', 'Reset' )
-			.attr( 'alt', 'Reset' );
-		var previousButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumPreviousButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png' )
-			.attr( 'title', 'Previous generation' )
-			.attr( 'alt', 'Previous generation' );
-		var playButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumPlayButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png' )
-			.attr( 'title', 'Play' )
-			.attr( 'alt', 'Play' );
-		var pauseButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumPauseButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png' )
-			.attr( 'title', 'Pause' )
-			.attr( 'alt', 'Pause' )
-			.hide(); // The pause button starts hidden
-		var nextButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumNextButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png' )
-			.attr( 'title', 'Next generation' )
-			.attr( 'alt', 'Next generation' );
-		var zoomOutButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumZoomOutButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png' )
-			.attr( 'title', 'Zoom out' )
-			.attr( 'alt', 'Zoom out' );
-		var zoomInButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumZoomInButton' )
-			.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png' )
-			.attr( 'title', 'Zoom in' )
-			.attr( 'alt', 'Zoom in' );
-/*
-		var addAntButton = $( '<img/>' )
-			.addClass( 'button' )
-			.attr( 'id', 'FormicariumAddButton' )
-			.attr( 'src', '//localhost/Formicarium/images/FormicariumAddAntButton.png' )
-			.attr( 'title', 'Add ant' )
-			.attr( 'alt', 'Add ant' );
-*/
-		var generationCounter = $( '<span/>' )
-			.attr( 'id', 'FormicariumGenerationCounter' )
-			.text( '0' );
-
-		// Put it all together
-		menu.append( resetButton )
-			.append( previousButton )
-			.append( playButton )
-			.append( pauseButton )
-			.append( nextButton )
-			.append( zoomOutButton )
-			.append( zoomInButton )
-			//.append( addAntButton )
-			.append( generationCounter );
-		wrapper.html( canvas ).append( menu );
-		wikiwidget.html( wrapper );
+		// Build the GUI and bind events
+		this.gui.buildAndBind()
 
 		// Set the variables that must wait for the DOM to be loaded
 		this.board.setCanvas( document.getElementById( 'FormicariumCanvas' ) );
@@ -83,50 +12,143 @@ var Formicarium = window.Formicarium = $.extend({
 		this.board.setWidth( 400 ); // Make this adjustable from the template?
 		this.board.setHeight( 300 );
 
-		// Bind events
-		canvas.click( function ( event ) {
-			Formicarium.mouse.click( event );
-		});
-		resetButton.click( function () {
-			Formicarium.game.reset();
-		});
-		previousButton.click( function () {
-			Formicarium.game.previous();
-		});
-		playButton.click( function () {
-			Formicarium.game.play();
-		});
-		pauseButton.click( function () {
-			Formicarium.game.pause();
-		});
-		nextButton.click( function () {
-			Formicarium.game.next();
-		});
-		zoomOutButton.click( function () {
-			Formicarium.board.zoomOut();
-		});
-		zoomInButton.click( function () {
-			Formicarium.board.zoomIn();
-		});
-		$( '#FormicariumMenu .button' ).mouseover( function ( event ) {
-			Formicarium.menu.showTooltip( event );
-		});
-		$( '#FormicariumMenu .button' ).mouseout( function ( event ) {
-			Formicarium.menu.hideTooltip( event );
-		});
-
-		// Create the initial ant in the center
-		var x = Math.floor( this.board.xCells / 2 );
-		var y = Math.floor( this.board.yCells / 2 );
-		var ant = new this.Ant( x, y );
+		// Create the initial ant
+		var ant = new this.Ant();
 		ant.register().draw();
+
+		// Set 'Move' as the default action 
+		$( '#FormicariumMoveButton' ).click();
 	},
 
-	menu: {
+	gui: {
+		buildAndBind: function () {
+			var wikiwidget = $( '#WikiWidget' );
+			var wrapper = $( '<div/>' ).attr( 'id', 'Formicarium' );
+			var canvas = $( '<canvas/>' ).attr( 'id', 'FormicariumCanvas' );
+			var menu = $( '<div/>' ).attr( 'id', 'FormicariumMenu' );
 
-		setGeneration: function ( value ) {
-			$( '#FormicariumGenerationCounter' ).text( value );
-			return this;
+			var moveButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumMoveButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/1/15/WikiWidgetMoveButton.png' )
+				.attr( 'title', 'Move' )
+				.attr( 'alt', 'Move' );
+			var zoomInButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumZoomInButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png' )
+				.attr( 'title', 'Zoom in' )
+				.attr( 'alt', 'Zoom in' );
+			var zoomOutButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumZoomOutButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png' )
+				.attr( 'title', 'Zoom out' )
+				.attr( 'alt', 'Zoom out' );
+			var resetButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumResetButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png' )
+				.attr( 'title', 'Reset' )
+				.attr( 'alt', 'Reset' );
+			var previousButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumPreviousButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png' )
+				.attr( 'title', 'Previous generation' )
+				.attr( 'alt', 'Previous generation' );
+			var playButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumPlayButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png' )
+				.attr( 'title', 'Play' )
+				.attr( 'alt', 'Play' );
+			var pauseButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumPauseButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png' )
+				.attr( 'title', 'Pause' )
+				.attr( 'alt', 'Pause' )
+				.hide(); // The pause button starts hidden
+			var nextButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumNextButton' )
+				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png' )
+				.attr( 'title', 'Next generation' )
+				.attr( 'alt', 'Next generation' );
+/*
+			var addAntButton = $( '<img/>' )
+				.addClass( 'button' )
+				.attr( 'id', 'FormicariumAddButton' )
+				.attr( 'src', '//localhost/Formicarium/images/FormicariumAddAntButton.png' )
+				.attr( 'title', 'Add ant' )
+				.attr( 'alt', 'Add ant' );
+*/
+			var generationCounter = $( '<span/>' )
+				.attr( 'id', 'FormicariumGenerationCounter' )
+				.text( '0' );
+
+			// Put it all together
+			menu.append( moveButton )
+				.append( zoomInButton )
+				.append( zoomOutButton )
+				.append( resetButton )
+				.append( previousButton )
+				.append( playButton )
+				.append( pauseButton )
+				.append( nextButton )
+				//.append( addAntButton )
+				.append( generationCounter );
+			wrapper.html( canvas ).append( menu );
+			wikiwidget.html( wrapper );
+
+			// Bind events
+			canvas.mousedown( function ( event ) {
+				Formicarium.mouse.down( event );
+			}).mousemove( function ( event ) {
+				Formicarium.mouse.move( event );
+			}).mouseup( function ( event ) {
+				Formicarium.mouse.up( event );
+			});
+			resetButton.click( function () {
+				Formicarium.game.reset();
+			});
+			previousButton.click( function () {
+				Formicarium.game.previous();
+			});
+			playButton.click( function () {
+				Formicarium.game.play();
+			});
+			pauseButton.click( function () {
+				Formicarium.game.pause();
+			});
+			nextButton.click( function () {
+				Formicarium.game.next();
+			});
+			zoomOutButton.click( function () {
+				Formicarium.board.zoomOut();
+			});
+			zoomInButton.click( function () {
+				Formicarium.board.zoomIn();
+			});
+			moveButton.click( function () {
+				$( this ).addClass( 'active' ).siblings().removeClass( 'active' );
+				Formicarium.mouse.downAction = null;
+				Formicarium.mouse.dragAction = 'moveBoard';
+				Formicarium.mouse.upAction = null;
+			});
+			$( '#FormicariumMenu .button' ).mouseover( function ( event ) {
+				Formicarium.gui.showTooltip( event );
+			}).mouseout( function ( event ) {
+				Formicarium.gui.hideTooltip( event );
+			});
+		},
+
+		/**
+		 * Updates the state of all the GUI elements
+		 */
+		update: function () {
+			$( '#FormicariumGenerationCounter' ).text( Formicarium.game.generation );
 		},
 
 		showTooltip: function ( event ) {
@@ -143,150 +165,149 @@ var Formicarium = window.Formicarium = $.extend({
 
 	game: {
 
-		ants: [],
-
 		speed: 1000,
 
 		generation: 0,
 
 		playing: false,
 
+		/* Setters */
+
 		setGeneration: function ( value ) {
 			this.generation = value;
-			Formicarium.menu.setGeneration( value );
-			return this;
+			Formicarium.gui.update();
 		},
 
-		setSpeed: function ( value ) {
-			this.speed = value;
-			return this;
-		},
-
-		getGeneration: function () {
-			return this.generation;
-		},
-
-		getSpeed: function () {
-			return this.speed;
-		},
+		/* Actions */
 
 		previous: function () {
-			var game = Formicarium.game; //The game cannot be referred to as this, because of the way the setInterval function works
-			var generation = game.getGeneration();
-			generation--;
-			game.setGeneration( generation );
-			for ( var i = 0; i < Formicarium.game.ants.length; i++ ) {
-				Formicarium.game.ants[ i ].undoRoutine();
+			Formicarium.game.setGeneration( Formicarium.game.generation - 1 );
+			for ( var i = 0; i < Formicarium.board.ants.length; i++ ) {
+				Formicarium.board.ants[ i ].undoRoutine();
 			}
-			return this;
 		},
 
 		next: function () {
-			var game = Formicarium.game; //The game cannot be referred to as this, because of the way the setInterval function works
-			var generation = game.getGeneration();
-			generation++;
-			game.setGeneration( generation );
-			for ( var i = 0; i < Formicarium.game.ants.length; i++ ) {
-				Formicarium.game.ants[ i ].doRoutine();
+			Formicarium.game.setGeneration( Formicarium.game.generation + 1 );
+			for ( var i = 0; i < Formicarium.board.ants.length; i++ ) {
+				Formicarium.board.ants[ i ].doRoutine();
 			}
-			return this;
 		},
 
 		play: function () {
 			if ( this.playing ) {
-				return this; //If the game is already playing, exit
+				return this; // If the game is already playing, exit
 			}
 			var interval = 1000 / this.speed;
-			this.playing = setInterval( this.next, interval ); //The interval's id is stored in the playing property
+			this.playing = setInterval( this.next, interval ); // The interval's id is stored in the playing property
 			$( '#FormicariumPlayButton' ).hide();
 			$( '#FormicariumPauseButton' ).show();
-			return this;
 		},
 
 		pause: function () {
 			if ( !this.playing ) {
-				return this; //If the game is already paused, exit
+				return this; // If the game is already paused, exit
 			}
 			clearInterval( this.playing );
 			this.playing = false;
 			$( '#FormicariumPlayButton' ).show();
 			$( '#FormicariumPauseButton' ).hide();
-			return this;
 		},
 
 		reset: function () {
 			// Reset the game
 			this.setGeneration( 0 );
-			this.ants = [];
 
 			// Reset the board
 			var board = Formicarium.board;
-			board.topLeftX = 0;
-			board.topLeftY = 0;
+			board.centerX = 0;
+			board.centerY = 0;
+			board.ants = [];
 			board.cells = [];
 			board.clear();
 
 			// Create the initial ant
-			var x = Math.floor( board.xCells / 2 );
-			var y = Math.floor( board.yCells / 2 );
-			var ant = new Formicarium.Ant( x, y );
+			var ant = new Formicarium.Ant();
 			ant.register().draw();
-
-			return this;
 		}
 	},
 
 	mouse: {
+		/**
+		 * The distance from the origin of the coordinate system in cells (not pixels)
+		 */
+		currentX: null,
+		currentY: null,
+		previousX: null,
+		previousY: null,
 
-		x: 0,
+		state: 'up', // up, down or drag
+		upAction: null,
+		dragAction: null,
+		downAction: null,
 
-		y: 0,
+		/* Getters */
 
-		action: 'addCell',
-
-		setX: function ( value ) {
-			this.x = value;
-			return this;
-		},
-
-		setY: function ( value ) {
-			this.y = value;
-			return this;
-		},
-
-		setAction: function ( value ) {
-			this.action = value;
-			return this;
-		},
-
-		setCursor: function ( value ) {
-			this.cursor = value;
-			board.canvas.style.cursor = value;
-			return this;
-		},
-
-		click: function ( event ) {
+		getCurrentX: function ( event ) {
 			var board = Formicarium.board;
-			var canvas = $( board.canvas );
-			var x = board.topLeftX + Math.floor( ( event.pageX - canvas.offset().left ) / board.cellSize );
-			var y = board.topLeftY + Math.floor( ( event.pageY - canvas.offset().top ) / board.cellSize );
-			//console.log( event.screenX, event.clientX, board.canvas.offsetLeft, x );
-			this.setX( x );
-			this.setY( y );
-			this[ this.action ]( event ); //Call the function stored in mouse.action, and pass the event
-			return this;
+			return board.centerX - Math.floor( board.xCells / 2 ) + Math.floor( event.offsetX / board.cellSize );
 		},
+
+		getCurrentY: function ( event ) {
+			var board = Formicarium.board;
+			return board.centerY - Math.floor( board.yCells / 2 ) + Math.floor( event.offsetY / board.cellSize );
+		},
+
+		/* Events */
+
+		up: function ( event ) {
+			this.state = 'up';
+			if ( this.upAction ) {
+				this[ this.upAction ]( event );
+			}
+		},
+
+		move: function ( event ) {
+			this.previousX = this.currentX;
+			this.previousY = this.currentY;
+			this.currentX = this.getCurrentX( event );
+			this.currentY = this.getCurrentY( event );
+
+			// If the mouse is being dragged, not just moved
+			var moved = ( this.currentX - this.previousX ) || ( this.currentY - this.previousY );
+			if ( this.state === 'down' && moved && this.dragAction ) {
+				this[ this.dragAction ]( event );
+			}
+		},
+
+		down: function ( event ) {
+			this.state = 'down';
+			if ( this.downAction ) {
+				this[ this.downAction ]( event );
+			}
+		},
+
+		/* Actions */
 
 		addAnt: function () {
 			var ant = new Formicarium.Ant( this.x, this.y );
 			ant.register().draw();
-			return this;
 		},
 
 		addCell: function () {
 			var cell = new Formicarium.Cell( this.x, this.y );
 			cell.register().draw();
-			return this;
+		},
+
+		moveBoard: function ( event ) {
+			Formicarium.board.centerX += this.previousX - this.currentX;
+			Formicarium.board.centerY += this.previousY - this.currentY;
+
+			Formicarium.board.refill();
+
+			// Bugfix: without the following, the board flickers when moving, not sure why
+			this.currentX = this.getCurrentX( event );
+			this.currentY = this.getCurrentY( event );
 		}
 	},
 
@@ -298,8 +319,8 @@ var Formicarium = window.Formicarium = $.extend({
 		width: 400,
 		height: 300,
 
-		topLeftX: 0,
-		topLeftY: 0,
+		centerX: 0,
+		centerY: 0,
 
 		cellSize: 4,
 
@@ -308,7 +329,10 @@ var Formicarium = window.Formicarium = $.extend({
 
 		background: 'black',
 
+		ants: [],
 		cells: [],
+
+		/* Getters */
 
 		getXcells: function () {
 			return Math.floor( this.width / this.cellSize );
@@ -318,59 +342,42 @@ var Formicarium = window.Formicarium = $.extend({
 			return Math.floor( this.height / this.cellSize );
 		},
 
+		/* Setters */
+
 		setCanvas: function ( value ) {
 			this.canvas = value;
-			return this;
 		},
 
 		setContext: function ( value ) {
 			this.context = value;
-			return this;
 		},
 
 		setWidth: function ( value ) {
 			this.width = value;
 			this.canvas.setAttribute( 'width', value );
 			this.xCells = this.getXcells();
-			return this;
 		},
 
 		setHeight: function ( value ) {
 			this.height = value;
 			this.canvas.setAttribute( 'height', value );
 			this.yCells = this.getYcells();
-			return this;
 		},
 
 		setCellSize: function ( value ) {
 			this.cellSize = parseInt( value );
 			this.xCells = this.getXcells();
 			this.yCells = this.getYcells();
-			return this;
 		},
 
-		move: function ( x, y ) {
-			var centerX = Math.floor( this.xCells / 2 )
-			var centerY = Math.floor( this.yCells / 2 )
-			var diffX = centerX - x
-			var diffY = centerY - y
-			for ( var i = 0; i < this.cells.length; i++ ) {
-				this.cells[i].x += diffX, this.cells[i].y += diffY;
-			}
-			ant.x += diffX, ant.y += diffY;
-			this.refill()
-			return this
-		},
+		/* Actions */
 
 		zoomIn: function () {
 			if ( this.cellSize === 32 ) {
 				return this;
 			}
 			this.setCellSize( this.cellSize * 2 );
-			this.topLeftX += Math.floor( this.xCells / 2 );
-			this.topLeftY += Math.floor( this.yCells / 2 );
 			this.refill();
-			return this;
 		},
 
 		zoomOut: function () {
@@ -378,30 +385,25 @@ var Formicarium = window.Formicarium = $.extend({
 				return this;
 			}
 			this.setCellSize( this.cellSize / 2 );
-			this.topLeftX -= Math.floor( this.xCells / 4 );
-			this.topLeftY -= Math.floor( this.yCells / 4 );
 			this.refill();
-			return this;
 		},
 
 		fill: function () {
 			for ( i in this.cells ) {
 				this.cells[ i ].draw();
 			}
-			for ( i in Formicarium.game.ants ) {
-				Formicarium.game.ants[ i ].draw();
+			for ( i in this.ants ) {
+				this.ants[ i ].draw();
 			}
-			return this;
 		},
 
 		clear: function () {
 			this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height );
-			return this;
 		},
 
 		refill: function() {
-			this.clear().fill();
-			return this;
+			this.clear();
+			this.fill();
 		},
 
 		getCell: function ( x, y ) {
@@ -414,43 +416,46 @@ var Formicarium = window.Formicarium = $.extend({
 		},
 
 		fillCell: function ( x, y, color ) {
-			if ( x < 0 || y < 0 || x > this.xCells || y > this.yCells ) {
-				//return this //If the cell is outside the board, exit
+			var topLeftX = this.centerX - Math.floor( this.xCells / 2 ),
+				topLeftY = this.centerY - Math.floor( this.yCells / 2 ),
+				bottomRightX = topLeftX + this.xCells,
+				bottomRightY = topLeftY + this.yCells;
+			if ( x < topLeftX || y < topLeftY || x > bottomRightX || y > bottomRightY ) {
+				return this; // If the cell is outside the board, don't draw it
 			}
-			var rectX = ( x - this.topLeftX ) * this.cellSize;
-			var rectY = ( y - this.topLeftY ) * this.cellSize;
-			var rectW = this.cellSize;
-			var rectH = this.cellSize;
+			var rectX = Math.abs( this.centerX - Math.floor( this.xCells / 2 ) - x ) * this.cellSize,
+				rectY = Math.abs( this.centerY - Math.floor( this.yCells / 2 ) - y ) * this.cellSize,
+				rectW = this.cellSize,
+				rectH = this.cellSize;
 			this.context.fillStyle = color;
 			this.context.fillRect( rectX, rectY, rectW, rectH );
-			return this;
 		},
 
 		clearCell: function ( x, y ) {
-			if ( x < 0 || y < 0 || x > this.xCells || y > this.yCells ) {
-				//return this; //If the cell is outside the board, exit
+			var topLeftX = this.centerX - Math.floor( this.xCells / 2 ),
+				topLeftY = this.centerY - Math.floor( this.yCells / 2 ),
+				bottomRightX = topLeftX + this.xCells,
+				bottomRightY = topLeftY + this.yCells;
+			if ( x < topLeftX || y < topLeftY || x > bottomRightX || y > bottomRightY ) {
+				return this; // If the cell is outside the board, there's no need to clear it
 			}
-			var rectX = ( x - this.topLeftX ) * this.cellSize;
-			var rectY = ( y - this.topLeftY ) * this.cellSize;
-			var rectW = this.cellSize;
-			var rectH = this.cellSize;
+			var rectX = Math.abs( this.centerX - Math.floor( this.xCells / 2 ) - x ) * this.cellSize,
+				rectY = Math.abs( this.centerY - Math.floor( this.yCells / 2 ) - y ) * this.cellSize,
+				rectW = this.cellSize,
+				rectH = this.cellSize;
 			this.context.clearRect( rectX, rectY, rectW, rectH );
-			return this;
 		},
 
-/*		createCell: function ( x, y, color ) {
+		createCell: function ( x, y, color ) {
 			var cell = new Formicarium.cell( x, y, color )
 			cell.register().draw();
-			return this;
 		},
-*/
 
 		destroyCell: function ( x, y ) {
 			var cell = this.getCell( x, y );
 			var indexOfCell = this.cells.indexOf( cell );
 			this.cells.splice( indexOfCell, 1 ); // Remove the cell from the array
 			this.clearCell( x, y );
-			return this;
 		}
 	},
 
@@ -475,9 +480,9 @@ var Formicarium = window.Formicarium = $.extend({
 
 	Ant: function ( x, y ) {
 
-		this.x = x;
+		this.x = x === undefined ? 0 : x;
 
-		this.y = y;
+		this.y = y === undefined ? 0 : y;
 
 		this.color = 'red';
 
@@ -486,7 +491,7 @@ var Formicarium = window.Formicarium = $.extend({
 		this.speed = 1;
 
 		this.register = function () {
-			Formicarium.game.ants.push( this );
+			Formicarium.board.ants.push( this );
 			return this;
 		};
 
@@ -581,7 +586,6 @@ var Formicarium = window.Formicarium = $.extend({
 
 			// Finally, draw the ant in the new position
 			this.draw();
-			return this;
 		};
 
 		this.undoRoutine = function() {
@@ -604,7 +608,6 @@ var Formicarium = window.Formicarium = $.extend({
 
 			// Finally, draw the ant in the new position
 			this.draw();
-			return this;
 		};
 	}
 });
