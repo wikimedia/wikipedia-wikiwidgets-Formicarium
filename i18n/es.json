@@ -1,0 +1,16 @@
+/**
+ * Localisation to Spanish of the Formicarium widget
+ */
+{
+	'ant-button': 'Agregar o quitar hormigas',
+	'cell-button': 'Agregar o quitar celdas',
+	'grid-button': 'Grilla',
+	'next-button': 'Generación siguiente',
+	'move-button': 'Mover',
+	'pause-button': 'Pausar',
+	'play-button': 'Reproducir',
+	'previous-button': 'Generación anterior',
+	'reset-button': 'Reiniciar',
+	'zoom-in-button': 'Acercar',
+	'zoom-out-button': 'Alejar'
+}

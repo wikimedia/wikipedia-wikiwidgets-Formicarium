@@ -11,7 +11,6 @@ None known!
 
 Tasks
 -----
-* Add/remove cells
 * Add/remove ants
 * Grid?
-* i18n
+* Change 'this' for 'Formicarium.whatever' in most contexts?

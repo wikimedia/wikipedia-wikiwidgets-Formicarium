@@ -1,0 +1,16 @@
+/**
+ * Localisation to English of the Formicarium widget
+ */
+{
+	'ant-button': 'Add or remove ants',
+	'cell-button': 'Add or remove cells',
+	'grid-button': 'Grid',
+	'next-button': 'Next generation',
+	'move-button': 'Move',
+	'pause-button': 'Pause',
+	'play-button': 'Play',
+	'previous-button': 'Previous generation',
+	'reset-button': 'Reset',
+	'zoom-in-button': 'Zoom in',
+	'zoom-out-button': 'Zoom out'
+}
