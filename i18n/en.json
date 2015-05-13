@@ -2,15 +2,26 @@
  * Localisation to English of the Formicarium widget
  */
 {
-	'ant-button': 'Add or remove ants',
-	'cell-button': 'Add or remove cells',
-	'grid-button': 'Grid',
-	'next-button': 'Next generation',
+	'ant-button': 'Ant',
+	'ant-button-tooltip': 'Add or remove ants',
+	'cell-button': 'Cell',
+	'cell-button-tooltip': 'Add or remove cells',
+	'next-button': 'Next',
+	'next-button-tooltip': 'Next generation',
 	'move-button': 'Move',
+	'move-button-tooltip': 'Move the board',
 	'pause-button': 'Pause',
+	'pause-button-tooltip': 'Pause',
 	'play-button': 'Play',
-	'previous-button': 'Previous generation',
+	'play-button-tooltip': 'Play',
+	'previous-button': 'Previous',
+	'previous-button-tooltip': 'Previous generation',
 	'reset-button': 'Reset',
+	'reset-button-tooltip': 'Reset',
 	'zoom-in-button': 'Zoom in',
-	'zoom-out-button': 'Zoom out'
+	'zoom-in-button-tooltip': 'Zoom in',
+	'zoom-out-button': 'Zoom out',
+	'zoom-out-button-tooltip': 'Zoom out',
+	'grid-button': 'Grid',
+	'grid-button-tooltip': 'Grid'
 }

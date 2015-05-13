@@ -2,15 +2,26 @@
  * Localisation to Spanish of the Formicarium widget
  */
 {
-	'ant-button': 'Agregar o quitar hormigas',
-	'cell-button': 'Agregar o quitar celdas',
-	'grid-button': 'Grilla',
-	'next-button': 'Generación siguiente',
+	'ant-button': 'Hormiga',
+	'ant-button-tooltip': 'Agregar o quitar hormigas',
+	'cell-button': 'Celda',
+	'cell-button-tooltip': 'Agregar o quitar celdas',
+	'next-button': 'Siguiente',
+	'next-button-tooltip': 'Generación siguiente',
 	'move-button': 'Mover',
+	'move-button-tooltip': 'Mover el tablero',
 	'pause-button': 'Pausar',
+	'pause-button-tooltip': 'Pausar',
 	'play-button': 'Reproducir',
-	'previous-button': 'Generación anterior',
+	'play-button-tooltip': 'Reproducir',
+	'previous-button': 'Anterior',
+	'previous-button-tooltip': 'Generación anterior',
 	'reset-button': 'Reiniciar',
+	'reset-button-tooltip': 'Reiniciar',
 	'zoom-in-button': 'Acercar',
-	'zoom-out-button': 'Alejar'
+	'zoom-in-button-tooltip': 'Acercar',
+	'zoom-out-button': 'Alejar',
+	'zoom-out-button-tooltip': 'Alejar',
+	'grid-button': 'Grilla',
+	'grid-button-tooltip': 'Grilla'
 }

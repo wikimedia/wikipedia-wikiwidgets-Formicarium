@@ -11,6 +11,5 @@ None known!
 
 Tasks
 -----
-* Add/remove ants
-* Grid?
-* Change 'this' for 'Formicarium.whatever' in most contexts?
+* Allow to add ants with different rules
+* Make the width and height adjustable from the template
