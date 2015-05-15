@@ -47,14 +47,15 @@ var Formicarium = {
 	 * Initialise Formicarium
 	 */
 	init: function () {
-		// Build the GUI and bind events
+		// Build the GUI and bind the events
 		this.gui.buildAndBind()
 
 		// Set the variables that must wait for the DOM to be loaded
-		this.board.setCanvas( document.getElementById( 'FormicariumCanvas' ) );
-		this.board.setContext( this.board.canvas.getContext( '2d' ) );
-		this.board.setWidth( 400 ); // Make this adjustable from the template?
-		this.board.setHeight( 300 );
+		this.board.setCanvas( $( '#FormicariumCanvas' )[0] );
+		this.board.setWidth( $( '#WikiWidget' ).width() );
+		this.board.setHeight( $( '#WikiWidget' ).height() );
+
+		// Add the initial ant
 		this.board.addAnt( 0, 0, 'red' );
 		this.board.fill();
 
@@ -326,12 +327,14 @@ var Formicarium = {
 
 		getCurrentX: function ( event ) {
 			var board = Formicarium.board;
-			return board.centerX - Math.floor( board.xCells / 2 ) + Math.floor( ( event.offsetX - 1 /* bugfix */ ) / board.cellSize );
+			var offsetX = event.pageX - $( event.target ).offset().left - 1; // The -1 is to correct a minor displacement
+			return board.centerX - Math.floor( board.xCells / 2 ) + Math.floor( offsetX / board.cellSize );
 		},
 
 		getCurrentY: function ( event ) {
 			var board = Formicarium.board;
-			return board.centerY - Math.floor( board.yCells / 2 ) + Math.floor( ( event.offsetY - 2 /* bugfix */ ) / board.cellSize );
+			var offsetY = event.pageY - $( event.target ).offset().top - 2; // The -2 is to correct a minor displacement
+			return board.centerY - Math.floor( board.yCells / 2 ) + Math.floor( offsetY / board.cellSize );
 		},
 
 		/* Events */
@@ -401,16 +404,16 @@ var Formicarium = {
 		canvas: {},
 		context: {},
 
-		width: 400,
-		height: 300,
+		width: null,
+		height: null,
 
 		centerX: 0,
 		centerY: 0,
 
 		cellSize: 4,
 
-		xCells: 100,
-		yCells: 75,
+		xCells: null,
+		yCells: null,
 
 		grid: false,
 
@@ -450,10 +453,7 @@ var Formicarium = {
 
 		setCanvas: function ( value ) {
 			this.canvas = value;
-		},
-
-		setContext: function ( value ) {
-			this.context = value;
+			this.context = value.getContext( '2d' );
 		},
 
 		setWidth: function ( value ) {

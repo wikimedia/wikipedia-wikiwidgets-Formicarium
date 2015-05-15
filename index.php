@@ -9,6 +9,6 @@
 	<meta charset="UTF-8">
 </head>
 <body>
-	<div id="WikiWidget"></div>
+	<div id="WikiWidget" style="height:600px;"></div>
 </body>
 </html>

@@ -1,12 +1,10 @@
 #Formicarium {
 	position: relative;
-	width: 400px;
 }
 
 #FormicariumCanvas {
 	background: black;
 	display: block;
-	width: 400px; height: 300px;
 }
 
 #FormicariumMenu {
@@ -30,7 +28,7 @@
 }
 
 #FormicariumGenerationCounter {
-	color: white;
-	position: absolute;
-	top: 3px; right: 5px;
+	float: right;
+	line-height: 16px;
+	padding: 5px;
 }
