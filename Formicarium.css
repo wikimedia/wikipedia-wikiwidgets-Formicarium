@@ -1,33 +1,33 @@
-#Formicarium {
+.Formicarium {
 	position: relative;
 }
 
-#FormicariumCanvas {
+.FormicariumCanvas {
 	background: black;
 	display: block;
 }
 
-#FormicariumMenu {
+.FormicariumMenu {
 	margin: 5px 0;
 }
 
-#FormicariumMenu .button {
+.FormicariumMenu .button {
 	cursor: pointer;
 	display: inline;
 	margin-right: 10px;
 	padding: 5px;
 }
 
-#FormicariumMenu .button.active {
+.FormicariumMenu .button.active {
 	background: #a7dcff;
 }
 
-#FormicariumMenu .button.disabled {
+.FormicariumMenu .button.disabled {
 	cursor: default;
 	opacity: .3;
 }
 
-#FormicariumGenerationCounter {
+.FormicariumGenerationCounter {
 	float: right;
 	line-height: 16px;
 	padding: 5px;

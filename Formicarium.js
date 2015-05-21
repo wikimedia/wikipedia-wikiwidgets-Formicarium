@@ -1,5 +1,5 @@
 /**
- * Formicarium is a widget meant to be embeded in articles about Langton's ant
+ * Formicarium is a simple widget for Wikipedia, meant to be embedded in articles about Langton's ant
  * in order to aid the understanding of the topic
  *
  * Written by Luis Felipe Schenone in 2015
@@ -48,98 +48,89 @@ var Formicarium = {
 	 */
 	init: function () {
 		// Build the GUI and bind the events
-		this.gui.buildAndBind()
+		Formicarium.gui.buildAndBind()
 
-		// Set the variables that must wait for the DOM to be loaded
-		this.board.setCanvas( $( '#FormicariumCanvas' )[0] );
-		this.board.setWidth( $( '#WikiWidget' ).width() );
-		this.board.setHeight( $( '#WikiWidget' ).height() );
-
-		// Add the initial ant
-		this.board.addAnt( 0, 0, 'red' );
-		this.board.fill();
+		// Add the initial ant in the center
+		Formicarium.board.addAnt( 0, 0, 'red' );
+		Formicarium.board.fill();
 
 		// Set 'Move' as the default action 
-		$( '#FormicariumMoveButton' ).click();
+		$( '.FormicariumMoveButton' ).click();
 	},
 
 	gui: {
 		buildAndBind: function () {
-			var wikiwidget = $( '#WikiWidget' );
-			var wrapper = $( '<div/>' ).attr( 'id', 'Formicarium' );
-			var canvas = $( '<canvas/>' ).attr( 'id', 'FormicariumCanvas' );
-			var menu = $( '<div/>' ).attr( 'id', 'FormicariumMenu' );
+			var wikiwidget = $( '.WikiWidget.Formicarium' );
+			var canvas = $( '<canvas>' ).attr( 'class', 'FormicariumCanvas' );
+			var menu = $( '<div>' ).attr( 'class', 'FormicariumMenu' );
 
-			var moveButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumMoveButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/1/15/WikiWidgetMoveButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'move-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'move-button' ) );
-			var cellButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumCellButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/f/ff/WikiWidgetCellButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'cell-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'cell-button' ) );
-			var antButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumAntButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetAntButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'ant-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'ant-button' ) );
-			var resetButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumResetButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'reset-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'reset-button' ) );
-			var previousButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumPreviousButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'previous-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'previous-button' ) );
-			var playButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumPlayButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'play-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'play-button' ) );
-			var pauseButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumPauseButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'pause-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'pause-button' ) )
-				.hide(); // The pause button starts hidden
-			var nextButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumNextButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'next-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'next-button' ) );
-			var zoomInButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumZoomInButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'zoom-in-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'zoom-in-button' ) );
-			var zoomOutButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumZoomOutButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'zoom-out-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'zoom-out-button' ) );
-			var gridButton = $( '<img/>' )
-				.addClass( 'button' )
-				.attr( 'id', 'FormicariumGridButton' )
-				.attr( 'src', '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetGridButton.png' )
-				.attr( 'title', Formicarium.getMessage( 'grid-button-tooltip' ) )
-				.attr( 'alt', Formicarium.getMessage( 'grid-button' ) );
-			var generationCounter = $( '<span/>' )
-				.attr( 'id', 'FormicariumGenerationCounter' )
-				.text( '0' );
+			var moveButton = $( '<img>' ).attr({
+				'class': 'button FormicariumMoveButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/1/15/WikiWidgetMoveButton.png',
+				'title': Formicarium.getMessage( 'move-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'move-button' )
+			});
+			var cellButton = $( '<img>' ).attr({
+				'class': 'button FormicariumCellButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/f/ff/WikiWidgetCellButton.png',
+				'title': Formicarium.getMessage( 'cell-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'cell-button' )
+			});
+			var antButton = $( '<img>' ).attr({
+				'class': 'button FormicariumAntButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetAntButton.png',
+				'title': Formicarium.getMessage( 'ant-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'ant-button' ),
+			});
+			var resetButton = $( '<img>' ).attr({
+				'class': 'button FormicariumResetButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png',
+				'title': Formicarium.getMessage( 'reset-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'reset-button' )
+			});
+			var previousButton = $( '<img>' ).attr({
+				'class': 'button FormicariumPreviousButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png',
+				'title': Formicarium.getMessage( 'previous-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'previous-button' )
+			});
+			var playButton = $( '<img>' ).attr({
+				'class': 'button FormicariumPlayButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png',
+				'title': Formicarium.getMessage( 'play-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'play-button' )
+			});
+			var pauseButton = $( '<img>' ).attr({
+				'class': 'button FormicariumPauseButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png',
+				'title': Formicarium.getMessage( 'pause-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'pause-button' )
+			}).hide(); // The pause button starts hidden
+			var nextButton = $( '<img>' ).attr({
+				'class': 'button FormicariumNextButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png',
+				'title': Formicarium.getMessage( 'next-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'next-button' )
+			});
+			var zoomInButton = $( '<img>' ).attr({
+				'class': 'button FormicariumZoomInButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png',
+				'title': Formicarium.getMessage( 'zoom-in-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'zoom-in-button' )
+			});
+			var zoomOutButton = $( '<img>' ).attr({
+				'class': 'button FormicariumZoomOutButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png',
+				'title': Formicarium.getMessage( 'zoom-out-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'zoom-out-button' )
+			});
+			var gridButton = $( '<img>' ).attr({
+				'class': 'button FormicariumGridButton',
+				'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetGridButton.png',
+				'title': Formicarium.getMessage( 'grid-button-tooltip' ),
+				'alt': Formicarium.getMessage( 'grid-button' )
+			});
+			var generationCounter = $( '<span>' ).attr( 'class', 'FormicariumGenerationCounter' ).text( 0 );
 
 			// Put it all together
 			menu.append( moveButton )
@@ -154,8 +145,12 @@ var Formicarium = {
 				.append( zoomOutButton )
 				.append( gridButton )
 				.append( generationCounter );
-			wrapper.html( canvas ).append( menu );
-			wikiwidget.html( wrapper );
+			wikiwidget.html( canvas ).append( menu );
+
+			// Set the variables that must wait for the DOM to be loaded
+			Formicarium.board.setCanvas( canvas[0] );
+			Formicarium.board.setWidth( wikiwidget.width() );
+			Formicarium.board.setHeight( wikiwidget.height() );
 
 			// Bind events
 			canvas.mousedown( function ( event ) {
@@ -214,27 +209,27 @@ var Formicarium = {
 		 * Updates the state of all the GUI elements
 		 */
 		update: function () {
-			$( '#FormicariumGenerationCounter' ).text( Formicarium.game.generation );
+			$( '.FormicariumGenerationCounter' ).text( Formicarium.game.generation );
 
-			$( '#FormicariumMenu .button' ).removeClass( 'disabled active' );
+			$( '.FormicariumMenu .button' ).removeClass( 'disabled active' );
 
 			if ( Formicarium.mouse.dragAction === 'moveBoard' ) {
-				$( '#FormicariumMoveButton' ).addClass( 'active' );
+				$( '.FormicariumMoveButton' ).addClass( 'active' );
 			}
 			if ( Formicarium.mouse.dragAction === 'addRemoveAnt' ) {
-				$( '#FormicariumAntButton' ).addClass( 'active' );
+				$( '.FormicariumAntButton' ).addClass( 'active' );
 			}
 			if ( Formicarium.mouse.dragAction === 'addRemoveCell' ) {
-				$( '#FormicariumCellButton' ).addClass( 'active' );
+				$( '.FormicariumCellButton' ).addClass( 'active' );
 			}
 			if ( Formicarium.board.cellSize < 4 ) {
-				$( '#FormicariumGridButton' ).addClass( 'disabled' );
+				$( '.FormicariumGridButton' ).addClass( 'disabled' );
 			}
 			if ( Formicarium.board.cellSize === 1 ) {
-				$( '#FormicariumZoomOutButton' ).addClass( 'disabled' );
+				$( '.FormicariumZoomOutButton' ).addClass( 'disabled' );
 			}
 			if ( Formicarium.board.cellSize === 32 ) {
-				$( '#FormicariumZoomInButton' ).addClass( 'disabled' );
+				$( '.FormicariumZoomInButton' ).addClass( 'disabled' );
 			}
 		},
 	},
@@ -280,8 +275,8 @@ var Formicarium = {
 			}
 			var interval = 1000 / this.speed;
 			this.playing = setInterval( this.next, interval ); // The interval's id is stored in the playing property
-			$( '#FormicariumPlayButton' ).hide();
-			$( '#FormicariumPauseButton' ).show();
+			$( '.FormicariumPlayButton' ).hide();
+			$( '.FormicariumPauseButton' ).show();
 		},
 
 		pause: function () {
@@ -290,8 +285,8 @@ var Formicarium = {
 			}
 			clearInterval( this.playing );
 			this.playing = false;
-			$( '#FormicariumPlayButton' ).show();
-			$( '#FormicariumPauseButton' ).hide();
+			$( '.FormicariumPlayButton' ).show();
+			$( '.FormicariumPauseButton' ).hide();
 		},
 
 		reset: function () {
@@ -505,7 +500,7 @@ var Formicarium = {
 				this.context.moveTo( 0, y * this.cellSize - 0.5 );
 				this.context.lineTo( this.width, y * this.cellSize - 0.5 );
 			}
-			this.context.strokeStyle = '#555';
+			this.context.strokeStyle = '.555';
 			this.context.stroke();
 		},
 
@@ -688,6 +683,4 @@ var Formicarium = {
 	}
 }
 
-jQuery( function (){
-	Formicarium.init();
-});
+jQuery( Formicarium.init );
