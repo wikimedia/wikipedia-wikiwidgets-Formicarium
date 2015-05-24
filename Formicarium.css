@@ -1,6 +1,5 @@
 .FormicariumCanvas {
 	background: black;
-	display: block;
 }
 
 .FormicariumMenu {
@@ -10,17 +9,12 @@
 .FormicariumMenu .button {
 	cursor: pointer;
 	display: inline;
-	margin-right: 10px;
+	margin-right: 7px;
 	padding: 5px;
 }
 
 .FormicariumMenu .button.active {
 	background: #a7dcff;
-}
-
-.FormicariumMenu .button.disabled {
-	cursor: default;
-	opacity: .3;
 }
 
 .FormicariumGenerationCounter {

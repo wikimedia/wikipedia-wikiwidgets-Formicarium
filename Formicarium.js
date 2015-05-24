@@ -150,8 +150,9 @@ var Formicarium = {
 
 			// Set the variables that must wait for the DOM to be loaded
 			Formicarium.board.setCanvas( canvas[0] );
-			Formicarium.board.setWidth( wikiwidget.width() );
-			Formicarium.board.setHeight( wikiwidget.height() );
+			Formicarium.board.setWidth( wikiwidget.attr( 'data-width' ) );
+			Formicarium.board.setHeight( wikiwidget.attr( 'data-height' ) );
+			wikiwidget.width( Formicarium.board.width );
 
 			// Bind events
 			canvas.mousedown( function ( event ) {
@@ -161,17 +162,20 @@ var Formicarium = {
 			}).mouseup( function ( event ) {
 				Formicarium.mouse.up( event );
 			});
-			moveButton.click( function () {
+			moveButton.click( function ( event ) {
+				$( event.target ).addClass( 'active' ).siblings().removeClass( 'active' );
 				Formicarium.mouse.downAction = null;
 				Formicarium.mouse.dragAction = 'moveBoard';
 				Formicarium.mouse.upAction = null;
 			});
-			cellButton.click( function () {
+			cellButton.click( function ( event ) {
+				$( event.target ).addClass( 'active' ).siblings().removeClass( 'active' );
 				Formicarium.mouse.downAction = null;
 				Formicarium.mouse.dragAction = 'addRemoveCell';
 				Formicarium.mouse.upAction = 'addRemoveCell';
 			});
-			antButton.click( function () {
+			antButton.click( function ( event ) {
+				$( event.target ).addClass( 'active' ).siblings().removeClass( 'active' );
 				Formicarium.mouse.downAction = null;
 				Formicarium.mouse.dragAction = 'addRemoveAnt';
 				Formicarium.mouse.upAction = 'addRemoveAnt';
@@ -201,38 +205,7 @@ var Formicarium = {
 				Formicarium.board.grid = Formicarium.board.grid === true ? false : true;
 				Formicarium.board.refill();
 			});
-			$( '.button', menu ).click( function () {
-				Formicarium.gui.update();
-			});
-		},
-
-		/**
-		 * Updates the state of all the GUI elements
-		 */
-		update: function () {
-			$( '.FormicariumGenerationCounter' ).text( Formicarium.game.generation );
-
-			$( '.FormicariumMenu .button' ).removeClass( 'disabled active' );
-
-			if ( Formicarium.mouse.dragAction === 'moveBoard' ) {
-				$( '.FormicariumMoveButton' ).addClass( 'active' );
-			}
-			if ( Formicarium.mouse.dragAction === 'addRemoveAnt' ) {
-				$( '.FormicariumAntButton' ).addClass( 'active' );
-			}
-			if ( Formicarium.mouse.dragAction === 'addRemoveCell' ) {
-				$( '.FormicariumCellButton' ).addClass( 'active' );
-			}
-			if ( Formicarium.board.cellSize < 4 ) {
-				$( '.FormicariumGridButton' ).addClass( 'disabled' );
-			}
-			if ( Formicarium.board.cellSize === 1 ) {
-				$( '.FormicariumZoomOutButton' ).addClass( 'disabled' );
-			}
-			if ( Formicarium.board.cellSize === 32 ) {
-				$( '.FormicariumZoomInButton' ).addClass( 'disabled' );
-			}
-		},
+		}
 	},
 
 	game: {
@@ -247,7 +220,7 @@ var Formicarium = {
 
 		setGeneration: function ( value ) {
 			this.generation = value;
-			Formicarium.gui.update();
+			$( '.FormicariumGenerationCounter' ).text( value );
 		},
 
 		/* Actions */
