@@ -1,5 +1,6 @@
 .FormicariumCanvas {
 	background: black;
+	display: block;
 }
 
 .FormicariumMenu {
