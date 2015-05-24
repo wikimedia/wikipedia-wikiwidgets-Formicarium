@@ -1,10 +1,7 @@
 Formicarium
 ===========
 
-Formicarium is a simple widget meant to be embedded in Wikipedia articles about Langton's ant
-to aid the understanding of the topic.
-
-Visit https://es.wikipedia.org/wiki/Hormiga_de_Langton to see it live.
+Formicarium is a simple widget meant to be embedded in Wikipedia articles about Langton's ant. It's part of the WikiWidgets project, aimed at helping readers to understand topics by means of interactive widgets.
 
 Bugs
 ----
