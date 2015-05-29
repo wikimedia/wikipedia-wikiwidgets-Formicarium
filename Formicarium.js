@@ -56,7 +56,6 @@ var Formicarium = {
 		// Start with a single ant in the center
 		Formicarium.board.addAnt( 0, 0, 'red' );
 		Formicarium.board.fill();
-		Formicarium.game.play();
 	},
 
 	gui: {

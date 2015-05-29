@@ -9,6 +9,8 @@ None known!
 
 Tasks
 -----
+* Code documentation
+* Localization to main languages
 * Allow n-state ants, see http://www.math.stonybrook.edu/preprints/ims95-1.pdf
 * Generalize so that more than one widget can be placed in the same page
 * Keep the messages array in its own file
