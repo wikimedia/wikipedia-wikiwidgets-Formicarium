@@ -149,8 +149,8 @@ var Formicarium = {
 
 			// Set the variables that must wait for the DOM to be loaded
 			Formicarium.board.setCanvas( canvas[0] );
-			Formicarium.board.setWidth( wikiwidget.attr( 'data-width' ) );
-			Formicarium.board.setHeight( wikiwidget.attr( 'data-height' ) );
+			Formicarium.board.setWidth( 400 );
+			Formicarium.board.setHeight( 300 );
 			wikiwidget.width( Formicarium.board.width );
 
 			// Bind events
@@ -376,8 +376,8 @@ var Formicarium = {
 		canvas: {},
 		context: {},
 
-		width: null,
-		height: null,
+		width: 400,
+		height: 300,
 
 		centerX: 0,
 		centerY: 0,
