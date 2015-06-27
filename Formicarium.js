@@ -376,8 +376,8 @@ var Formicarium = {
 		canvas: {},
 		context: {},
 
-		width: 400,
-		height: 300,
+		width: null,
+		height: null,
 
 		centerX: 0,
 		centerY: 0,
