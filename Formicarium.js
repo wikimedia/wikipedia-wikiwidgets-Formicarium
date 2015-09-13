@@ -227,10 +227,8 @@ var Formicarium = {
 		previous: function () {
 			Formicarium.game.setGeneration( Formicarium.game.generation - 1 );
 			Formicarium.board.previousCells = Formicarium.board.currentCells.slice(); // Clone
-			var i, ant;
-			for ( i in Formicarium.board.ants ) {
-				ant = Formicarium.board.ants[ i ];
-				ant.undoRoutine();
+			for ( var i in Formicarium.board.ants ) {
+				Formicarium.board.ants[ i ].undoRoutine();
 			}
 			Formicarium.board.refill();
 		},
@@ -238,10 +236,8 @@ var Formicarium = {
 		next: function () {
 			Formicarium.game.setGeneration( Formicarium.game.generation + 1 );
 			Formicarium.board.previousCells = Formicarium.board.currentCells.slice(); // Clone
-			var i, ant;
-			for ( i in Formicarium.board.ants ) {
-				ant = Formicarium.board.ants[ i ];
-				ant.doRoutine();
+			for ( var i in Formicarium.board.ants ) {
+				Formicarium.board.ants[ i ].doRoutine();
 			}
 			Formicarium.board.refill();
 		},
@@ -283,7 +279,7 @@ var Formicarium = {
 
 	mouse: {
 		/**
-		 * The distance from the origin of the coordinate system in cells (not pixels)
+		 * The distance to the origin of the coordinate system (in cells, not pixels)
 		 */
 		currentX: null,
 		currentY: null,
@@ -351,7 +347,7 @@ var Formicarium = {
 		},
 
 		addRemoveCell: function ( event ) {
-			var cell = Formicarium.board.getCell( this.currentX, this.currentY );
+			var cell = Formicarium.board.getCurrentCell( this.currentX, this.currentY );
 			if ( cell ) {
 				Formicarium.board.removeCell( this.currentX, this.currentY );
 			} else {
@@ -403,7 +399,18 @@ var Formicarium = {
 			return Math.floor( this.height / this.cellSize );
 		},
 
-		getCell: function ( x, y ) {
+		getCurrentCell: function ( x, y ) {
+			var i, cell;
+			for ( i in this.currentCells ) {
+				cell = this.currentCells[ i ];
+				if ( cell.x === x && cell.y === y ) {
+					return cell;
+				}
+			}
+			return null;
+		},
+
+		getPreviousCell: function ( x, y ) {
 			var i, cell;
 			for ( i in this.previousCells ) {
 				cell = this.previousCells[ i ];
@@ -532,7 +539,7 @@ var Formicarium = {
 		},
 
 		removeCell: function ( x, y ) {
-			var cell = this.getCell( x, y );
+			var cell = this.getCurrentCell( x, y );
 			var indexOfCell = this.currentCells.indexOf( cell );
 			this.currentCells.splice( indexOfCell, 1 ); // Remove the cell from the array
 		},
@@ -562,8 +569,8 @@ var Formicarium = {
 
 		this.speed = 1;
 
-		this.getCell = function () {
-			return Formicarium.board.getCell( this.x, this.y );
+		this.getPreviousCell = function () {
+			return Formicarium.board.getPreviousCell( this.x, this.y );
 		};
 
 		this.addCell = function ( color ) {
@@ -594,12 +601,12 @@ var Formicarium = {
 		this.turnRight = function () {
 			if ( this.direction === 'N' ) {
 				this.direction = 'E';
-			} else if ( this.direction === 'E' ) {
-				this.direction = 'S';
-			} else if ( this.direction === 'S' ) {
-				this.direction = 'W';
 			} else if ( this.direction === 'W' ) {
 				this.direction = 'N';
+			} else if ( this.direction === 'S' ) {
+				this.direction = 'W';
+			} else if ( this.direction === 'E' ) {
+				this.direction = 'S';
 			}
 			return this;
 		};
@@ -631,7 +638,7 @@ var Formicarium = {
 		};
 
 		this.doRoutine = function () {
-			var cell = this.getCell();
+			var cell = this.getPreviousCell();
 			if ( cell ) {
 				this.removeCell().turnRight();
 			} else {
@@ -642,7 +649,7 @@ var Formicarium = {
 
 		this.undoRoutine = function () {
 			this.moveBack();
-			var cell = this.getCell();
+			var cell = this.getPreviousCell();
 			if ( cell ) {
 				this.removeCell().turnRight();
 			} else {
