@@ -8,52 +8,71 @@
  */
 var Formicarium = {
 
-	/**
-	 * Localisation to Spanish
-	 */
 	messages: {
-		'ant-button': 'Hormiga',
-		'ant-button-tooltip': 'Agregar o quitar hormigas',
-		'cell-button': 'Celda',
-		'cell-button-tooltip': 'Agregar o quitar celdas',
-		'move-button': 'Mover',
-		'move-button-tooltip': 'Mover el tablero',
-		'zoom-in-button': 'Acercar',
-		'zoom-in-button-tooltip': 'Acercar',
-		'zoom-out-button': 'Alejar',
-		'zoom-out-button-tooltip': 'Alejar',
-		'grid-button': 'Grilla',
-		'grid-button-tooltip': 'Grilla',
-		'reset-button': 'Reiniciar',
-		'reset-button-tooltip': 'Reiniciar',
-		'previous-button': 'Anterior',
-		'previous-button-tooltip': 'Generación anterior',
-		'play-button': 'Reproducir',
-		'play-button-tooltip': 'Reproducir',
-		'pause-button': 'Pausar',
-		'pause-button-tooltip': 'Pausar',
-		'next-button': 'Siguiente',
-		'next-button-tooltip': 'Generación siguiente',
+		'es': {
+			'ant-button': 'Hormiga',
+			'ant-button-tooltip': 'Agregar o quitar hormigas',
+			'cell-button': 'Celda',
+			'cell-button-tooltip': 'Agregar o quitar celdas',
+			'move-button': 'Mover',
+			'move-button-tooltip': 'Mover el tablero',
+			'zoom-in-button': 'Acercar',
+			'zoom-in-button-tooltip': 'Acercar',
+			'zoom-out-button': 'Alejar',
+			'zoom-out-button-tooltip': 'Alejar',
+			'grid-button': 'Grilla',
+			'grid-button-tooltip': 'Grilla',
+			'reset-button': 'Reiniciar',
+			'reset-button-tooltip': 'Reiniciar',
+			'previous-button': 'Anterior',
+			'previous-button-tooltip': 'Generación anterior',
+			'play-button': 'Reproducir',
+			'play-button-tooltip': 'Reproducir',
+			'pause-button': 'Pausar',
+			'pause-button-tooltip': 'Pausar',
+			'next-button': 'Siguiente',
+			'next-button-tooltip': 'Generación siguiente',
+		},
+		'en': {
+			'ant-button': 'Ant',
+			'ant-button-tooltip': 'Add or remove ants',
+			'cell-button': 'Cell',
+			'cell-button-tooltip': 'Add or remove cells',
+			'move-button': 'Move',
+			'move-button-tooltip': 'Move the board',
+			'zoom-in-button': 'Zoom in',
+			'zoom-in-button-tooltip': 'Zoom in',
+			'zoom-out-button': 'Zoom out',
+			'zoom-out-button-tooltip': 'Zoom out',
+			'grid-button': 'Grid',
+			'grid-button-tooltip': 'Grid',
+			'reset-button': 'Reset',
+			'reset-button-tooltip': 'Reset',
+			'previous-button': 'Previous',
+			'previous-button-tooltip': 'Previous generation',
+			'play-button': 'Play',
+			'play-button-tooltip': 'Play',
+			'pause-button': 'Pause',
+			'pause-button-tooltip': 'Pause',
+			'next-button': 'Next',
+			'next-button-tooltip': 'Next generation',
+		},
 	}, 
 
 	/**
-	 * Convenience method that returns a localised message for the given key
-	 */
-	getMessage: function( key ) {
-		return this.messages[ key ];
-	},
-
-	/**
-	 * Initialise Formicarium
+	 * Initialisation script
 	 */
 	init: function () {
+		// Set the interface messages
+		mw.messages.set( Formicarium.messages[ mw.config.get( 'wgUserLanguage' ) ] );
+
 		// Build the GUI and bind the events
 		Formicarium.gui.buildAndBind()
 
-		// Add ants as the default action 
+		// Set the default action 
 		$( '.FormicariumAntButton' ).click();
 
-		// Start with a single ant in the center
+		// Add a single ant in the center
 		Formicarium.board.addAnt( 0, 0, 'red' );
 		Formicarium.board.fill();
 	},
@@ -67,68 +86,68 @@ var Formicarium = {
 			var antButton = $( '<img>' ).attr({
 				'class': 'button FormicariumAntButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetAntButton.png',
-				'title': Formicarium.getMessage( 'ant-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'ant-button' ),
+				'title': mw.message( 'ant-button-tooltip' ),
+				'alt': mw.message( 'ant-button' ),
 			});
 			var cellButton = $( '<img>' ).attr({
 				'class': 'button FormicariumCellButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/f/ff/WikiWidgetCellButton.png',
-				'title': Formicarium.getMessage( 'cell-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'cell-button' )
+				'title': mw.message( 'cell-button-tooltip' ),
+				'alt': mw.message( 'cell-button' )
 			});
 			var moveButton = $( '<img>' ).attr({
 				'class': 'button FormicariumMoveButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/1/15/WikiWidgetMoveButton.png',
-				'title': Formicarium.getMessage( 'move-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'move-button' )
+				'title': mw.message( 'move-button-tooltip' ),
+				'alt': mw.message( 'move-button' )
 			});
 			var zoomInButton = $( '<img>' ).attr({
 				'class': 'button FormicariumZoomInButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png',
-				'title': Formicarium.getMessage( 'zoom-in-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'zoom-in-button' )
+				'title': mw.message( 'zoom-in-button-tooltip' ),
+				'alt': mw.message( 'zoom-in-button' )
 			});
 			var zoomOutButton = $( '<img>' ).attr({
 				'class': 'button FormicariumZoomOutButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png',
-				'title': Formicarium.getMessage( 'zoom-out-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'zoom-out-button' )
+				'title': mw.message( 'zoom-out-button-tooltip' ),
+				'alt': mw.message( 'zoom-out-button' )
 			});
 			var gridButton = $( '<img>' ).attr({
 				'class': 'button FormicariumGridButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetGridButton.png',
-				'title': Formicarium.getMessage( 'grid-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'grid-button' )
+				'title': mw.message( 'grid-button-tooltip' ),
+				'alt': mw.message( 'grid-button' )
 			});
 			var resetButton = $( '<img>' ).attr({
 				'class': 'button FormicariumResetButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png',
-				'title': Formicarium.getMessage( 'reset-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'reset-button' )
+				'title': mw.message( 'reset-button-tooltip' ),
+				'alt': mw.message( 'reset-button' )
 			});
 			var previousButton = $( '<img>' ).attr({
 				'class': 'button FormicariumPreviousButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png',
-				'title': Formicarium.getMessage( 'previous-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'previous-button' )
+				'title': mw.message( 'previous-button-tooltip' ),
+				'alt': mw.message( 'previous-button' )
 			});
 			var playButton = $( '<img>' ).attr({
 				'class': 'button FormicariumPlayButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png',
-				'title': Formicarium.getMessage( 'play-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'play-button' )
+				'title': mw.message( 'play-button-tooltip' ),
+				'alt': mw.message( 'play-button' )
 			});
 			var pauseButton = $( '<img>' ).attr({
 				'class': 'button FormicariumPauseButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png',
-				'title': Formicarium.getMessage( 'pause-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'pause-button' )
+				'title': mw.message( 'pause-button-tooltip' ),
+				'alt': mw.message( 'pause-button' )
 			}).hide(); // The pause button starts hidden
 			var nextButton = $( '<img>' ).attr({
 				'class': 'button FormicariumNextButton',
 				'src': '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png',
-				'title': Formicarium.getMessage( 'next-button-tooltip' ),
-				'alt': Formicarium.getMessage( 'next-button' )
+				'title': mw.message( 'next-button-tooltip' ),
+				'alt': mw.message( 'next-button' )
 			});
 			var generationCounter = $( '<span>' ).attr( 'class', 'FormicariumGenerationCounter' ).text( 0 );
 
