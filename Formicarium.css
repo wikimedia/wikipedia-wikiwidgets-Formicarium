@@ -7,14 +7,15 @@
 	margin: 5px 0;
 }
 
-.FormicariumMenu .button {
+.FormicariumButton {
 	cursor: pointer;
 	display: inline;
 	margin-right: 7px;
 	padding: 5px;
+	user-select: none;
 }
 
-.FormicariumMenu .button.active {
+.FormicariumButton.active {
 	background: #a7dcff;
 }
 
