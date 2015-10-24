@@ -83,8 +83,8 @@ var Formicarium = {
 	gui: {
 		init: function () {
 			var container = $( '.WikiWidget[data-wikiwidget="Formicarium"]' ),
-				canvas = $( '<canvas>' ).attr( 'class', 'FormicariumCanvas' ),
-				menu = $( '<div>' ).attr( 'class', 'FormicariumMenu' );
+				canvas = $( '<canvas>' ).addClass( 'FormicariumCanvas' ),
+				menu = $( '<div>' ).addClass( 'FormicariumMenu' );
 
 			var antButton = $( '<img>' ).attr({
 				'class': 'FormicariumButton FormicariumAntButton',
@@ -247,7 +247,7 @@ var Formicarium = {
 
 		play: function () {
 			if ( Formicarium.game.playing ) {
-				return; // If the game is already playing
+				return; // The game is already playing
 			}
 			Formicarium.game.playing = setInterval( Formicarium.game.next, 1 ); // The interval id is stored in the playing property
 			$( '.FormicariumPlayButton' ).hide();
@@ -256,7 +256,7 @@ var Formicarium = {
 
 		pause: function () {
 			if ( !Formicarium.game.playing ) {
-				return; // If the game is already paused
+				return; // The game is already paused
 			}
 			clearInterval( Formicarium.game.playing );
 			Formicarium.game.playing = false;
@@ -266,6 +266,7 @@ var Formicarium = {
 
 		reset: function () {
 			// Reset the game
+			Formicarium.game.pause();
 			Formicarium.game.setGeneration( 0 );
 
 			// Reset the board
@@ -280,7 +281,7 @@ var Formicarium = {
 
 	mouse: {
 		/**
-		 * The distance to the origin of the coordinate system (in cells, not pixels)
+		 * The position relative to the origin of the coordinate system of the board (in cells, not pixels)
 		 */
 		newX: null,
 		newY: null,
