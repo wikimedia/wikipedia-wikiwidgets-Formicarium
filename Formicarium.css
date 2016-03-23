@@ -1,3 +1,7 @@
+.FormicariumContainer {
+	position: relative;
+}
+
 .FormicariumCanvas {
 	background: black;
 	display: block;
@@ -19,7 +23,22 @@
 }
 
 .FormicariumGenerationCounter {
-	float: right;
-	line-height: 16px;
-	padding: 5px;
+	color: white;
+	font-size: small;
+	position: absolute;
+	top: 5px; left: 5px;
+}
+
+.FormicariumCellCounter {
+	color: white;
+	font-size: small;
+	position: absolute;
+	top: 20px; left: 5px;
+}
+
+.FormicariumAntCounter {
+	color: white;
+	font-size: small;
+	position: absolute;
+	top: 35px; left: 5px;
 }
