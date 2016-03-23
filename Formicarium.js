@@ -16,7 +16,7 @@ var Formicarium = {
 			'cell-button': 'Zelle',
 			'cell-button-tooltip': 'Zelle hinzufügen oder entfernen',
 			'move-button': 'Bewegen',
-			'move-button-tooltip': 'Board bewegen',
+			'move-button-tooltip': 'board bewegen',
 			'zoom-in-button': 'Einzoomen',
 			'zoom-in-button-tooltip': 'Einzoomen',
 			'zoom-out-button': 'Auszoomen',
@@ -49,13 +49,13 @@ var Formicarium = {
 			'grid-button-tooltip': 'Grid',
 			'reset-button': 'Reset',
 			'reset-button-tooltip': 'Reset',
-			'previous-generation-button': 'Previous generation',
+			'previous-generation-button': 'Previous',
 			'previous-generation-button-tooltip': 'Previous generation',
 			'play-button': 'Play',
 			'play-button-tooltip': 'Play',
 			'pause-button': 'Pause',
 			'pause-button-tooltip': 'Pause',
-			'next-generation-button': 'Next generation',
+			'next-generation-button': 'Next',
 			'next-generation-button-tooltip': 'Next generation',
 			'generation-counter': 'Generation ',
 			'cell-counter': 'Cells ',
@@ -82,8 +82,8 @@ var Formicarium = {
 			'play-button-tooltip': 'Reproducir',
 			'pause-button': 'Pausar',
 			'pause-button-tooltip': 'Pausar',
-			'next-generation-button': 'Próxima generación',
-			'next-generation-button-tooltip': 'Próxima generación',
+			'next-generation-button': 'Siguiente',
+			'next-generation-button-tooltip': 'Generación siguiente',
 			'generation-counter': 'Generación ',
 			'cell-counter': 'Celdas ',
 			'ant-counter': 'Hormigas ',
@@ -173,306 +173,310 @@ var Formicarium = {
 		}
 		mw.messages.set( Formicarium.messages[ lang ] );
 
-		// Build the GUI and bind the events
-		Formicarium.gui.buildAndBind();
+		$( '.WikiWidget[data-wikiwidget="Formicarium"]' ).each( function () {
+			var gui = new Formicarium.GUI( this ),
+				board = new Formicarium.Board( gui ),
+				game = new Formicarium.Game( board ),
+				mouse = new Formicarium.Mouse( board );
 
-		// Load the first ant and start
-		Formicarium.game.reset();
-		Formicarium.game.play();
+			gui.bindEvents( board, game, mouse );
+
+			var width = $( this ).data( 'width' );
+			if ( width ) {
+				board.setWidth( width );
+			}
+
+			var height = $( this ).data( 'height' )
+			if ( height ) {
+				board.setHeight( height );
+			}
+
+			var cells = $( this ).data( 'cells' );
+			if ( cells ) {
+				cells = cells.split( ';' );
+				cells.forEach( function ( coords ) {
+					coords = coords.split( ',' );
+					x = coords[0];
+					y = coords[1];
+					board.addCell( x, y );
+				});
+			}
+
+			var ants = $( this ).data( 'ants' );
+			if ( ants ) {
+				ants = ants.split( ';' );
+				ants.forEach( function ( coords ) {
+					coords = coords.split( ',' );
+					x = coords[0];
+					y = coords[1];
+					board.addAnt( x, y );
+				});
+			}
+
+			var zoom = $( this ).data( 'zoom' );
+			if ( zoom ) {
+				board.setCellSize( zoom );
+			}
+
+			if ( $( this ).data( 'grid' ) ) {
+				board.grid = true;
+			}
+
+			board.refill();
+
+			if ( $( this ).data( 'autoplay' ) ) {
+				game.play();
+			}
+		});
 	},
 
 	/**
 	 * Graphical User Interface
 	 */
-	gui: {
-		buildAndBind: function () {
-			var wikiwidget = $( '.WikiWidget[data-wikiwidget="Formicarium"]' ),
-				container = $( '<div>' ).addClass( 'FormicariumContainer' ),
-				canvas = $( '<canvas>' ).addClass( 'FormicariumCanvas' ),
-				generationCounter = $( '<span>' ).addClass( 'FormicariumGenerationCounter' ).text( mw.message( 'generation-counter' ) + 0 ),
-				cellCounter = $( '<span>' ).addClass( 'FormicariumCellCounter' ).text( mw.message( 'cell-counter' ) + 0 ),
-				antCounter = $( '<span>' ).addClass( 'FormicariumAntCounter' ).text( mw.message( 'ant-counter' ) + 0 ),
-				menu = $( '<div>' ).addClass( 'FormicariumMenu' );
+	GUI: function ( div ) {
 
-			var zoomInButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumZoomInButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png',
-				'title': mw.message( 'zoom-in-button-tooltip' ),
-				'alt': mw.message( 'zoom-in-button' )
-			});
-			var zoomOutButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumZoomOutButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png',
-				'title': mw.message( 'zoom-out-button-tooltip' ),
-				'alt': mw.message( 'zoom-out-button' )
-			});
-			var gridButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumGridButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetGridButton.png',
-				'title': mw.message( 'grid-button-tooltip' ),
-				'alt': mw.message( 'grid-button' )
-			});
-			var resetButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumResetButton',
-				'src': '',
-				'title': mw.message( 'reset-button-tooltip' ),
-				'alt': mw.message( 'reset-button' )
-			});
-			var previousGenerationButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumPreviousGenerationButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png',
-				'title': mw.message( 'previous-generation-button-tooltip' ),
-				'alt': mw.message( 'previous-generation-button' )
-			});
-			var playButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumPlayButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png',
-				'title': mw.message( 'play-button-tooltip' ),
-				'alt': mw.message( 'play-button' )
-			});
-			var pauseButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumPauseButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png',
-				'title': mw.message( 'pause-button-tooltip' ),
-				'alt': mw.message( 'pause-button' )
-			}).hide(); // The pause button starts hidden
-			var nextGenerationButton = $( '<img>' ).attr({
-				'class': 'FormicariumButton FormicariumNextGenerationButton',
-				'src': '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png',
-				'title': mw.message( 'next-generation-button-tooltip' ),
-				'alt': mw.message( 'next-generation-button' )
-			});
+		this.div = div;
 
-			// Put it all together
-			menu.append( zoomInButton )
-				.append( zoomOutButton )
-				.append( gridButton )
-				.append( resetButton )
-				.append( previousGenerationButton )
-				.append( playButton )
-				.append( pauseButton )
-				.append( nextGenerationButton )
-			container.append( canvas )
-				.append( menu )
-				.append( generationCounter )
-				.append( cellCounter )
-				.append( antCounter );
-			wikiwidget.append( container );
+		this.container = $( '<div>' ).addClass( 'FormicariumContainer' );
 
-			// Set the variables that must wait for the DOM to be loaded
-			Formicarium.board.setCanvas( canvas[0] );
-			Formicarium.board.setWidth( 400 );
-			Formicarium.board.setHeight( 300 );
+		this.canvas = $( '<canvas>' ).addClass( 'FormicariumCanvas' );
 
-			// Bind events
-			canvas.mousedown( Formicarium.mouse.down ).mousemove( Formicarium.mouse.move ).mouseup( Formicarium.mouse.up );
-			resetButton.click( Formicarium.game.reset );
-			previousGenerationButton.click( Formicarium.game.previousGeneration );
-			playButton.click( Formicarium.game.play );
-			pauseButton.click( Formicarium.game.pause );
-			nextGenerationButton.click( Formicarium.game.nextGeneration );
-			zoomOutButton.click( Formicarium.board.zoomOut );
-			zoomInButton.click( Formicarium.board.zoomIn );
-			gridButton.click( Formicarium.board.toggleGrid );
-		}
+		this.generationCounter = $( '<span>' ).addClass( 'FormicariumCounter FormicariumGenerationCounter' ).text( mw.message( 'generation-counter' ) + 0 );
+
+		this.cellCounter = $( '<span>' ).addClass( 'FormicariumCounter FormicariumCellCounter' ).text( mw.message( 'cell-counter' ) + 0 );
+
+		this.antCounter = $( '<span>' ).addClass( 'FormicariumCounter FormicariumAntCounter' ).text( mw.message( 'ant-counter' ) + 0 );
+
+		this.menu = $( '<div>' ).addClass( 'FormicariumMenu' );
+
+		this.zoomInButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumZoomInButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/2/2e/WikiWidgetZoomInButton.png',
+			'title': mw.message( 'zoom-in-button-tooltip' ),
+			'alt': mw.message( 'zoom-in-button' )
+		});
+
+		this.zoomOutButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumZoomOutButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/6/63/WikiWidgetZoomOutButton.png',
+			'title': mw.message( 'zoom-out-button-tooltip' ),
+			'alt': mw.message( 'zoom-out-button' )
+		});
+
+		this.gridButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumGridButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/a/a9/WikiWidgetGridButton.png',
+			'title': mw.message( 'grid-button-tooltip' ),
+			'alt': mw.message( 'grid-button' )
+		});
+
+		this.resetButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumResetButton',
+			'src': '',
+			'title': mw.message( 'reset-button-tooltip' ),
+			'alt': mw.message( 'reset-button' )
+		});
+
+		this.previousGenerationButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumPreviousGenerationButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/c/c3/WikiWidgetPreviousFrameButton.png',
+			'title': mw.message( 'previous-generation-button-tooltip' ),
+			'alt': mw.message( 'previous-generation-button' )
+		});
+
+		this.playButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumPlayButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/b/b8/WikiWidgetPlayButton.png',
+			'title': mw.message( 'play-button-tooltip' ),
+			'alt': mw.message( 'play-button' )
+		});
+
+		this.pauseButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumPauseButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/6/6e/WikiWidgetPauseButton.png',
+			'title': mw.message( 'pause-button-tooltip' ),
+			'alt': mw.message( 'pause-button' )
+		}).hide(); // The pause button starts hidden
+
+		this.nextGenerationButton = $( '<img>' ).attr({
+			'class': 'FormicariumButton FormicariumNextGenerationButton',
+			'src': '//upload.wikimedia.org/wikipedia/commons/b/bf/WikiWidgetNextFrameButton.png',
+			'title': mw.message( 'next-generation-button-tooltip' ),
+			'alt': mw.message( 'next-generation-button' )
+		});
+
+		// Put it all together
+		this.menu.append(
+			this.zoomInButton,
+			this.zoomOutButton,
+			this.gridButton,
+			this.resetButton,
+			this.previousGenerationButton,
+			this.playButton,
+			this.pauseButton,
+			this.nextGenerationButton
+		);
+		this.container.append(
+			this.canvas,
+			this.menu,
+			this.generationCounter,
+			this.cellCounter,
+			this.antCounter
+		);
+		$( this.div ).append( this.container );
+
+		this.bindEvents = function ( board, game, mouse ) {
+
+			// Board events
+			this.zoomOutButton.click( function () { board.zoomOut(); } );
+			this.zoomInButton.click( function () { board.zoomIn(); } );
+			this.gridButton.click( function () { board.toggleGrid(); } );
+
+			// Game events
+			this.resetButton.click( function () { game.reset(); } );
+			this.previousGenerationButton.click( function () { game.previousGeneration(); } );
+			this.playButton.click( function () { game.play(); } );
+			this.pauseButton.click( function () { game.pause(); } );
+			this.nextGenerationButton.click( function () { game.nextGeneration(); } );
+
+			// Mouse events
+			this.canvas.mousedown( function ( event ) { mouse.down( event ) } );
+			this.canvas.mousemove( function ( event ) { mouse.move( event ) } );
+			this.canvas.mouseup( function ( event ) { mouse.up( event ) } );
+		};
 	},
 
-	game: {
+	Game: function ( board ) {
 
-		generationCounter: 0,
-		cellCounter: 0,
-		antCounter: 0,
+		this.board = board;
 
-		playing: false,
+		this.playing = false;
+
+		this.generationCounter = 0;
 
 		/* Setters */
 
-		setGenerationCounter: function ( value ) {
-			Formicarium.game.generationCounter = value;
-			$( '.FormicariumGenerationCounter' ).text( mw.message( 'generation-counter' ) + value );
-		},
-
-		setCellCounter: function ( value ) {
-			Formicarium.game.cellCounter = value;
-			$( '.FormicariumCellCounter' ).text( mw.message( 'cell-counter' ) + value );
-		},
-
-		setAntCounter: function ( value ) {
-			Formicarium.game.antCounter = value;
-			$( '.FormicariumAntCounter' ).text( mw.message( 'ant-counter' ) + value );
-		},
+		this.setGenerationCounter = function ( value ) {
+			this.generationCounter = value;
+			this.board.gui.generationCounter.text( mw.message( 'generation-counter' ) + value );
+		};
 
 		/* Actions */
 
-		previousGeneration: function () {
-			Formicarium.board.oldCells = Formicarium.board.newCells.slice(); // Clone the array
-			for ( var i in Formicarium.board.ants ) {
-				Formicarium.board.ants[ i ].undoRoutine();
+		this.previousGeneration = function () {
+			this.board.oldCells = this.board.cells.slice(); // Clone the array
+			for ( var i in this.board.ants ) {
+				this.board.ants[ i ].undoRoutine();
 			}
-			Formicarium.board.refill();
-			Formicarium.game.setGenerationCounter( Formicarium.game.generationCounter - 1 );
-		},
+			this.board.refill();
+			this.setGenerationCounter( this.generationCounter - 1 );
+		};
 
-		nextGeneration: function () {
-			Formicarium.board.oldCells = Formicarium.board.newCells.slice(); // Clone the array
-			for ( var i in Formicarium.board.ants ) {
-				Formicarium.board.ants[ i ].doRoutine();
+		this.nextGeneration = function () {
+			this.board.oldCells = this.board.cells.slice(); // Clone the array
+			for ( var i in this.board.ants ) {
+				this.board.ants[ i ].doRoutine();
 			}
-			Formicarium.board.refill();
-			Formicarium.game.setGenerationCounter( Formicarium.game.generationCounter + 1 );
-		},
+			this.board.refill();
+			this.setGenerationCounter( this.generationCounter + 1 );
+		};
 
-		reset: function () {
-			Formicarium.game.pause();
-			Formicarium.game.setGenerationCounter( 0 );
-			Formicarium.game.setCellCounter( 0 );
-			Formicarium.game.setAntCounter( 0 );
-			Formicarium.board.oldCells = [];
-			Formicarium.board.newCells = [];
-			Formicarium.board.ants = [];
-			Formicarium.board.addAnt( 0, 0 );
-			Formicarium.board.refill();
-		},
+		this.reset = function () {
+			// Reset the board
+			this.board.oldCells = [];
+			this.board.cells = [];
+			this.board.ants = [];
+			this.board.centerX = 0;
+			this.board.centerY = 0;
+			this.board.setCellCounter( 0 );
+			this.board.setAntCounter( 0 );
+			this.board.refill();
 
-		play: function () {
-			if ( !Formicarium.game.playing ) {
-				Formicarium.game.playing = setInterval( Formicarium.game.nextGeneration, 1 ); // The interval id is stored in the playing property
+			// Reset the game
+			this.pause();
+			this.setGenerationCounter( 0 );
+		};
+
+		this.play = function () {
+			if ( !this.playing ) {
+				var game = this;
+				this.playing = setInterval( function () { game.nextGeneration(); }, 1 ); // The interval id is stored in the playing property
 			}
-			$( '.FormicariumPlayButton' ).hide();
-			$( '.FormicariumPauseButton' ).show();
-		},
+			this.board.gui.playButton.hide();
+			this.board.gui.pauseButton.show();
+		};
 
-		pause: function () {
-			if ( Formicarium.game.playing ) {
-				clearInterval( Formicarium.game.playing );
-				Formicarium.game.playing = false;
+		this.pause = function () {
+			if ( this.playing ) {
+				clearInterval( this.playing );
+				this.playing = false;
 			}
-			$( '.FormicariumPlayButton' ).show();
-			$( '.FormicariumPauseButton' ).hide();
-		}
+			this.board.gui.playButton.show();
+			this.board.gui.pauseButton.hide();
+		};
 	},
 
-	mouse: {
-		/**
-		 * The position relative to the origin of the coordinate system of the board (in cells, not pixels)
-		 */
-		newX: null,
-		newY: null,
-		oldX: null,
-		oldY: null,
+	Board: function ( gui ) {
 
-		state: null, // up or down
+		this.gui = gui;
+
+		this.canvas = this.gui.canvas[0];
+		this.context = this.canvas.getContext( '2d' );
+
+		this.width = this.canvas.width;
+		this.height = this.canvas.height;
+
+		this.centerX = 0;
+		this.centerY = 0;
+
+		this.cellSize = 4;
+
+		this.xCells = Math.floor( this.width / this.cellSize );
+		this.yCells = Math.floor( this.height / this.cellSize );
+
+		this.grid = false;
+
+		this.cellCounter = 0;
+		this.antCounter = 0;
+
+		this.oldCells = [];
+		this.cells = [];
+		this.ants = [];
+
+		/* Setters */
+
+		this.setCellCounter = function ( value ) {
+			this.cellCounter = value;
+			this.gui.cellCounter.text( mw.message( 'cell-counter' ) + value );
+		};
+
+		this.setAntCounter = function ( value ) {
+			this.antCounter = value;
+			this.gui.antCounter.text( mw.message( 'ant-counter' ) + value );
+		};
 
 		/* Getters */
 
-		getX: function ( event ) {
-			var board = Formicarium.board,
-				offsetX = event.pageX - $( event.target ).offset().left - 1, // The -1 is to correct a minor displacement
-				newX = board.centerX - Math.floor( board.xCells / 2 ) + Math.floor( offsetX / board.cellSize );
-			return newX;
-		},
-
-		getY: function ( event ) {
-			var board = Formicarium.board,
-				offsetY = event.pageY - $( event.target ).offset().top - 2, // The -2 is to correct a minor displacement
-				newY = board.centerY - Math.floor( board.yCells / 2 ) + Math.floor( offsetY / board.cellSize );
-			return newY;
-		},
-
-		/* Events */
-
-		up: function ( event ) {
-			Formicarium.mouse.state = 'up';
-			Formicarium.mouse.oldX = Formicarium.mouse.newX;
-			Formicarium.mouse.oldY = Formicarium.mouse.newY;
-			Formicarium.mouse.newX = Formicarium.mouse.getX( event );
-			Formicarium.mouse.newY = Formicarium.mouse.getY( event );
-
-			// If click, not drag
-			if ( Formicarium.mouse.newX === Formicarium.mouse.oldX && Formicarium.mouse.newY === Formicarium.mouse.oldY ) {
-
-				var x = Formicarium.mouse.newX,
-					y = Formicarium.mouse.newY,
-					ant = Formicarium.board.getAnt( x, y );
-				if ( ant ) {
-					Formicarium.board.removeAnt( x, y );
-				} else {
-					Formicarium.board.addAnt( x, y );
-				}
-				Formicarium.board.refill();
-			}
-		},
-
-		move: function ( event ) {
-			Formicarium.mouse.oldX = Formicarium.mouse.newX;
-			Formicarium.mouse.oldY = Formicarium.mouse.newY;
-			Formicarium.mouse.newX = Formicarium.mouse.getX( event );
-			Formicarium.mouse.newY = Formicarium.mouse.getY( event );
-
-			// If drag, not click
-			if ( Formicarium.mouse.state === 'down' && ( Formicarium.mouse.newX !== Formicarium.mouse.oldX || Formicarium.mouse.newY !== Formicarium.mouse.oldY ) ) {
-
-				Formicarium.board.centerX += Formicarium.mouse.oldX - Formicarium.mouse.newX;
-				Formicarium.board.centerY += Formicarium.mouse.oldY - Formicarium.mouse.newY;
-				Formicarium.board.refill();
-
-				// Bugfix: without the following, the board flickers when moving, not sure why
-				Formicarium.mouse.newX = Formicarium.mouse.getX( event );
-				Formicarium.mouse.newY = Formicarium.mouse.getY( event );
-			}
-		},
-
-		down: function ( event ) {
-			Formicarium.mouse.state = 'down';
-			Formicarium.mouse.newX = Formicarium.mouse.getX( event );
-			Formicarium.mouse.newY = Formicarium.mouse.getY( event );
-		}
-	},
-
-	board: {
-
-		canvas: null,
-		context: null,
-
-		width: null,
-		height: null,
-
-		centerX: 0,
-		centerY: 0,
-
-		cellSize: 4,
-
-		xCells: null,
-		yCells: null,
-
-		grid: false,
-
-		ants: [],
-		oldCells: [],
-		newCells: [],
-
-		/* Getters */
-
-		getXcells: function () {
+		this.getXcells = function () {
 			return Math.floor( this.width / this.cellSize );
-		},
+		};
 
-		getYcells: function () {
+		this.getYcells = function () {
 			return Math.floor( this.height / this.cellSize );
-		},
+		};
 
-		getNewCell: function ( x, y ) {
+		this.getCell = function ( x, y ) {
 			var i, cell;
-			for ( i in this.newCells ) {
-				cell = this.newCells[ i ];
+			for ( i in this.cells ) {
+				cell = this.cells[ i ];
 				if ( cell.x === x && cell.y === y ) {
 					return cell;
 				}
 			}
 			return null;
-		},
+		};
 
-		getOldCell: function ( x, y ) {
+		this.getOldCell = function ( x, y ) {
 			var i, cell;
 			for ( i in this.oldCells ) {
 				cell = this.oldCells[ i ];
@@ -481,9 +485,9 @@ var Formicarium = {
 				}
 			}
 			return null;
-		},
+		};
 
-		getAnt: function ( x, y ) {
+		this.getAnt = function ( x, y ) {
 			var i, ant;
 			for ( i in this.ants ) {
 				ant = this.ants[ i ];
@@ -492,57 +496,52 @@ var Formicarium = {
 				}
 			}
 			return null;
-		},
+		};
 
 		/* Setters */
 
-		setCanvas: function ( value ) {
-			this.canvas = value;
-			this.context = value.getContext( '2d' );
-		},
-
-		setWidth: function ( value ) {
-			this.width = value;
+		this.setWidth = function ( value ) {
+			this.width = parseInt( value );
 			this.canvas.setAttribute( 'width', value );
 			this.xCells = this.getXcells();
-		},
+		};
 
-		setHeight: function ( value ) {
-			this.height = value;
+		this.setHeight = function ( value ) {
+			this.height = parseInt( value );
 			this.canvas.setAttribute( 'height', value );
 			this.yCells = this.getYcells();
-		},
+		};
 
-		setCellSize: function ( value ) {
+		this.setCellSize = function ( value ) {
 			this.cellSize = parseInt( value );
 			this.xCells = this.getXcells();
 			this.yCells = this.getYcells();
-		},
+		};
 
 		/* Actions */
 
-		zoomIn: function () {
-			if ( Formicarium.board.cellSize === 32 ) {
+		this.zoomIn = function () {
+			if ( this.cellSize === 32 ) {
 				return;
 			}
-			Formicarium.board.setCellSize( Formicarium.board.cellSize * 2 );
-			Formicarium.board.refill();
-		},
+			this.setCellSize( this.cellSize * 2 );
+			this.refill();
+		};
 
-		zoomOut: function () {
-			if ( Formicarium.board.cellSize === 1 ) {
+		this.zoomOut = function () {
+			if ( this.cellSize === 1 ) {
 				return;
 			}
-			Formicarium.board.setCellSize( Formicarium.board.cellSize / 2 );
-			Formicarium.board.refill();
-		},
+			this.setCellSize( this.cellSize / 2 );
+			this.refill();
+		};
 
-		toggleGrid: function () {
-			Formicarium.board.grid = Formicarium.board.grid ? false : true;
-			Formicarium.board.refill();
-		},
+		this.toggleGrid = function () {
+			this.grid = this.grid ? false : true;
+			this.refill();
+		};
 
-		drawGrid: function () {
+		this.drawGrid = function () {
 			if ( this.cellSize < 4 ) {
 				return; // Cells are too small for the grid
 			}
@@ -557,34 +556,33 @@ var Formicarium = {
 			}
 			this.context.strokeStyle = '#333';
 			this.context.stroke();
-		},
+		};
 
-		fill: function () {
+		this.fill = function () {
 			var i, cell, ant;
-			for ( i in this.newCells ) {
-				cell = this.newCells[ i ];
-				Formicarium.board.fillCell( cell.x, cell.y, cell.color );
+			for ( i in this.cells ) {
+				cell = this.cells[ i ];
+				this.fillCell( cell.x, cell.y, cell.color );
 			}
 			for ( i in this.ants ) {
 				ant = this.ants[ i ];
-				Formicarium.board.fillCell( ant.x, ant.y, ant.color );
+				this.fillCell( ant.x, ant.y, ant.color );
 			}
-			Formicarium.game.setCellCounter( this.newCells.length );
 			if ( this.grid ) {
 				this.drawGrid();
 			}
-		},
+		};
 
-		clear: function () {
+		this.clear = function () {
 			this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height );
-		},
+		};
 
-		refill: function () {
+		this.refill = function () {
 			this.clear();
 			this.fill();
-		},
+		};
 
-		fillCell: function ( x, y, color ) {
+		this.fillCell = function ( x, y, color ) {
 			var minX = this.centerX - Math.floor( this.xCells / 2 ),
 				minY = this.centerY - Math.floor( this.yCells / 2 ),
 				maxX = minX + this.xCells,
@@ -598,60 +596,140 @@ var Formicarium = {
 				rectH = this.cellSize;
 			this.context.fillStyle = color;
 			this.context.fillRect( rectX, rectY, rectW, rectH );
-		},
+		};
 
-		addNewCell: function ( x, y, color ) {
-			var cell = this.getNewCell( x, y );
-				index = this.newCells.indexOf( cell );
+		this.addCell = function ( x, y, color ) {
+			var x = parseInt( x ),
+				y = parseInt( y ),
+				cell = this.getCell( x, y ),
+				index = this.cells.indexOf( cell );
 			if ( index === -1 ) {
+				var color = color ? color : 'white';
 				this.fillCell( x, y, color );
-				this.newCells.push({ 'x': x, 'y': y, 'color': color });
-				Formicarium.game.setCellCounter( Formicarium.game.population + 1 );
+				this.cells.push({ 'x': x, 'y': y, 'color': color });
+				this.setCellCounter( this.cellCounter + 1 );
 			}
-		},
+		};
 
-		addOldCell: function ( x, y, color ) {
+		this.addOldCell = function ( x, y, color ) {
 			var cell = this.getOldCell( x, y );
 				index = this.oldCells.indexOf( cell );
 			if ( index === -1 ) {
+				var color = color ? color : 'white';
 				this.fillCell( x, y, color );
 				this.oldCells.push({ 'x': x, 'y': y, 'color': color });
 			}
-		},
+		};
 
-		removeNewCell: function ( x, y ) {
-			var cell = this.getNewCell( x, y ),
-				index = this.newCells.indexOf( cell );
+		this.removeCell = function ( x, y ) {
+			var cell = this.getCell( x, y ),
+				index = this.cells.indexOf( cell );
 			if ( index > -1 ) {
-				this.newCells.splice( index, 1 );
-				Formicarium.game.setCellCounter( Formicarium.game.population - 1 );
+				this.cells.splice( index, 1 );
+				this.setCellCounter( this.cellCounter - 1 );
 			}
-		},
+		};
 
-		removeOldCell: function ( x, y ) {
+		this.removeOldCell = function ( x, y ) {
 			var cell = this.getOldCell( x, y ),
 				index = this.oldCells.indexOf( cell );
 			if ( index > -1 ) {
 				this.oldCells.splice( index, 1 );
 			}
-		},
+		};
 
-		addAnt: function ( x, y ) {
-			Formicarium.board.fillCell( x, y );
-			var ant = new Formicarium.Ant( x, y )
+		this.addAnt = function ( x, y ) {
+			var ant = new Formicarium.Ant( this, x, y );
 			this.ants.push( ant );
-			Formicarium.game.setAntCounter( Formicarium.game.antCounter + 1 );
-		},
+			this.setAntCounter( this.antCounter + 1 );
+		};
 
-		removeAnt: function ( x, y ) {
+		this.removeAnt = function ( x, y ) {
 			var ant = this.getAnt( x, y ),
 				index = this.ants.indexOf( ant );
 			this.ants.splice( index, 1 );
-			Formicarium.game.setAntCounter( Formicarium.game.antCounter - 1 );
-		}
+			this.setAntCounter( this.antCounter - 1 );
+		};
 	},
 
-	Ant: function ( x, y, color, direction ) {
+	Mouse: function ( board ) {
+
+		this.board = board;
+
+		/**
+		 * The position relative to the origin of the coordinate system of the board (in cells, not pixels)
+		 */
+		this.oldX = null;
+		this.oldY = null;
+		this.newX = null;
+		this.newY = null;
+
+		this.state = null; // up or down
+		this.drag = false;
+
+		/* Getters */
+
+		this.getX = function ( event ) {
+			var offsetX = event.pageX - $( event.target ).offset().left - 1, // The -1 is to correct a minor displacement
+				newX = this.board.centerX - Math.floor( this.board.xCells / 2 ) + Math.floor( offsetX / this.board.cellSize );
+			return newX;
+		};
+
+		this.getY = function ( event ) {
+			var offsetY = event.pageY - $( event.target ).offset().top - 2, // The -2 is to correct a minor displacement
+				newY = this.board.centerY - Math.floor( this.board.yCells / 2 ) + Math.floor( offsetY / this.board.cellSize );
+			return newY;
+		};
+
+		/* Events */
+
+		this.up = function ( event ) {
+			this.state = 'up';
+
+			if ( !this.drag ) {
+				var x = this.newX,
+					y = this.newY,
+					ant = this.board.getAnt( x, y );
+				if ( ant ) {
+					this.board.removeAnt( x, y );
+				} else {
+					this.board.addAnt( x, y );
+				}
+				this.board.refill();
+			}
+			this.drag = false;
+		};
+
+		this.move = function ( event ) {
+			this.oldX = this.newX;
+			this.oldY = this.newY;
+			this.newX = this.getX( event );
+			this.newY = this.getY( event );
+
+			// If drag, not click
+			if ( this.state === 'down' && ( this.newX !== this.oldX || this.newY !== this.oldY ) ) {
+				this.drag = true;
+
+				this.board.centerX += this.oldX - this.newX;
+				this.board.centerY += this.oldY - this.newY;
+				this.board.refill();
+
+				// Bugfix: without the following, the board flickers when moving, not sure why
+				this.newX = this.getX( event );
+				this.newY = this.getY( event );
+			}
+		};
+
+		this.down = function ( event ) {
+			this.state = 'down';
+			this.newX = this.getX( event );
+			this.newY = this.getY( event );
+		};
+	},
+
+	Ant: function ( board, x, y, color, direction ) {
+
+		this.board = board;
 
 		this.x = x ? x : 0;
 
@@ -661,31 +739,31 @@ var Formicarium = {
 
 		this.direction = direction ? direction : 'N';
 
-		this.getNewCell = function () {
-			return Formicarium.board.getNewCell( this.x, this.y );
+		this.getCell = function () {
+			return this.board.getCell( this.x, this.y );
 		};
 
 		this.getOldCell = function () {
-			return Formicarium.board.getOldCell( this.x, this.y );
+			return this.board.getOldCell( this.x, this.y );
 		};
 
-		this.addNewCell = function ( color ) {
-			Formicarium.board.addNewCell( this.x, this.y, color );
+		this.addCell = function ( color ) {
+			this.board.addCell( this.x, this.y, color );
 			return this;
 		};
 
-		this.removeNewCell = function () {
-			Formicarium.board.removeNewCell( this.x, this.y );
+		this.removeCell = function () {
+			this.board.removeCell( this.x, this.y );
 			return this;
 		};
 
 		this.addOldCell = function ( color ) {
-			Formicarium.board.addOldCell( this.x, this.y, color );
+			this.board.addOldCell( this.x, this.y, color );
 			return this;
 		};
 
 		this.removeOldCell = function () {
-			Formicarium.board.removeOldCell( this.x, this.y );
+			this.board.removeOldCell( this.x, this.y );
 			return this;
 		};
 
@@ -744,9 +822,9 @@ var Formicarium = {
 		this.doRoutine = function () {
 			var cell = this.getOldCell();
 			if ( cell ) {
-				this.removeNewCell().turnRight();
+				this.removeCell().turnRight();
 			} else {
-				this.addNewCell( 'white' ).turnLeft();
+				this.addCell().turnLeft();
 			}
 			this.moveForward();
 		};
@@ -755,9 +833,9 @@ var Formicarium = {
 			this.moveBack();
 			var cell = this.getOldCell();
 			if ( cell ) {
-				this.removeNewCell().turnRight();
+				this.removeCell().turnRight();
 			} else {
-				this.addNewCell( 'white' ).turnLeft();
+				this.addCell().turnLeft();
 			}
 		};
 	}

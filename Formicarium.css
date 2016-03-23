@@ -22,23 +22,22 @@
 	background: #a7dcff;
 }
 
-.FormicariumGenerationCounter {
+.FormicariumCounter {
 	color: white;
 	font-size: small;
+	pointer-events: none;
 	position: absolute;
-	top: 5px; left: 5px;
+	left: 5px;
+}
+
+.FormicariumGenerationCounter {
+	top: 5px;
 }
 
 .FormicariumCellCounter {
-	color: white;
-	font-size: small;
-	position: absolute;
-	top: 20px; left: 5px;
+	top: 20px;
 }
 
 .FormicariumAntCounter {
-	color: white;
-	font-size: small;
-	position: absolute;
-	top: 35px; left: 5px;
+	top: 35px;
 }

@@ -9,9 +9,9 @@ None known!
 
 Tasks
 -----
-* Demos
-* Documentation
-* Generalize so that more than one widget can be placed in the same page
-* Allow n-state ants? http://www.math.stonybrook.edu/preprints/ims95-1.pdf
-* Board resizing?
+* Buttons not selectable
+* Black border around counters
+* Reset button image
+* Reset should recreate the initial conditions
 * Mobile version
+* Documentation
