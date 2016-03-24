@@ -9,9 +9,9 @@ None known!
 
 Tasks
 -----
-* Buttons not selectable
+* Make buttons not selectable
 * Black border around counters
 * Reset button image
-* Reset should recreate the initial conditions
 * Mobile version
 * Documentation
+* Ant skin?

@@ -178,51 +178,11 @@ var Formicarium = {
 				board = new Formicarium.Board( gui ),
 				game = new Formicarium.Game( board ),
 				mouse = new Formicarium.Mouse( board );
+				touch = new Formicarium.Touch( board );
 
-			gui.bindEvents( board, game, mouse );
+			gui.bindEvents( board, game, mouse, touch );
 
-			var width = $( this ).data( 'width' );
-			if ( width ) {
-				board.setWidth( width );
-			}
-
-			var height = $( this ).data( 'height' )
-			if ( height ) {
-				board.setHeight( height );
-			}
-
-			var cells = $( this ).data( 'cells' );
-			if ( cells ) {
-				cells = cells.split( ';' );
-				cells.forEach( function ( coords ) {
-					coords = coords.split( ',' );
-					x = coords[0];
-					y = coords[1];
-					board.addCell( x, y );
-				});
-			}
-
-			var ants = $( this ).data( 'ants' );
-			if ( ants ) {
-				ants = ants.split( ';' );
-				ants.forEach( function ( coords ) {
-					coords = coords.split( ',' );
-					x = coords[0];
-					y = coords[1];
-					board.addAnt( x, y );
-				});
-			}
-
-			var zoom = $( this ).data( 'zoom' );
-			if ( zoom ) {
-				board.setCellSize( zoom );
-			}
-
-			if ( $( this ).data( 'grid' ) ) {
-				board.grid = true;
-			}
-
-			board.refill();
+			board.init();
 
 			if ( $( this ).data( 'autoplay' ) ) {
 				game.play();
@@ -233,9 +193,9 @@ var Formicarium = {
 	/**
 	 * Graphical User Interface
 	 */
-	GUI: function ( div ) {
+	GUI: function ( wrapper ) {
 
-		this.div = div;
+		this.wrapper = $( wrapper );
 
 		this.container = $( '<div>' ).addClass( 'FormicariumContainer' );
 
@@ -323,9 +283,9 @@ var Formicarium = {
 			this.cellCounter,
 			this.antCounter
 		);
-		$( this.div ).append( this.container );
+		this.wrapper.append( this.container );
 
-		this.bindEvents = function ( board, game, mouse ) {
+		this.bindEvents = function ( board, game, mouse, touch ) {
 
 			// Board events
 			this.zoomOutButton.click( function () { board.zoomOut(); } );
@@ -343,76 +303,11 @@ var Formicarium = {
 			this.canvas.mousedown( function ( event ) { mouse.down( event ) } );
 			this.canvas.mousemove( function ( event ) { mouse.move( event ) } );
 			this.canvas.mouseup( function ( event ) { mouse.up( event ) } );
-		};
-	},
 
-	Game: function ( board ) {
-
-		this.board = board;
-
-		this.playing = false;
-
-		this.generationCounter = 0;
-
-		/* Setters */
-
-		this.setGenerationCounter = function ( value ) {
-			this.generationCounter = value;
-			this.board.gui.generationCounter.text( mw.message( 'generation-counter' ) + value );
-		};
-
-		/* Actions */
-
-		this.previousGeneration = function () {
-			this.board.oldCells = this.board.cells.slice(); // Clone the array
-			for ( var i in this.board.ants ) {
-				this.board.ants[ i ].undoRoutine();
-			}
-			this.board.refill();
-			this.setGenerationCounter( this.generationCounter - 1 );
-		};
-
-		this.nextGeneration = function () {
-			this.board.oldCells = this.board.cells.slice(); // Clone the array
-			for ( var i in this.board.ants ) {
-				this.board.ants[ i ].doRoutine();
-			}
-			this.board.refill();
-			this.setGenerationCounter( this.generationCounter + 1 );
-		};
-
-		this.reset = function () {
-			// Reset the board
-			this.board.oldCells = [];
-			this.board.cells = [];
-			this.board.ants = [];
-			this.board.centerX = 0;
-			this.board.centerY = 0;
-			this.board.setCellCounter( 0 );
-			this.board.setAntCounter( 0 );
-			this.board.refill();
-
-			// Reset the game
-			this.pause();
-			this.setGenerationCounter( 0 );
-		};
-
-		this.play = function () {
-			if ( !this.playing ) {
-				var game = this;
-				this.playing = setInterval( function () { game.nextGeneration(); }, 1 ); // The interval id is stored in the playing property
-			}
-			this.board.gui.playButton.hide();
-			this.board.gui.pauseButton.show();
-		};
-
-		this.pause = function () {
-			if ( this.playing ) {
-				clearInterval( this.playing );
-				this.playing = false;
-			}
-			this.board.gui.playButton.show();
-			this.board.gui.pauseButton.hide();
+			// Touch events
+			this.canvas.bind( 'touchstart', function ( event ) { touch.start( event ) } );
+			this.canvas.bind( 'touchmove', function ( event ) { touch.move( event ) } );
+			this.canvas.bind( 'touchend', function ( event ) { touch.end( event ) } );
 		};
 	},
 
@@ -443,16 +338,63 @@ var Formicarium = {
 		this.cells = [];
 		this.ants = [];
 
-		/* Setters */
+		/**
+		 * Constructor
+		 */
+		this.init = function () {
+			this.oldCells = [];
+			this.cells = [];
+			this.ants = [];
+			this.centerX = 0;
+			this.centerY = 0;
+			this.setCellCounter( 0 );
+			this.setAntCounter( 0 );
 
-		this.setCellCounter = function ( value ) {
-			this.cellCounter = value;
-			this.gui.cellCounter.text( mw.message( 'cell-counter' ) + value );
-		};
+			var wrapper = this.gui.wrapper,
+				width = wrapper.data( 'width' ),
+				height = wrapper.data( 'height' ),
+				cells = wrapper.data( 'cells' ),
+				ants = wrapper.data( 'ants' ),
+				zoom = wrapper.data( 'zoom' ),
+				grid = wrapper.data( 'grid' );
 
-		this.setAntCounter = function ( value ) {
-			this.antCounter = value;
-			this.gui.antCounter.text( mw.message( 'ant-counter' ) + value );
+			if ( width ) {
+				this.setWidth( width );
+			}
+
+			if ( height ) {
+				this.setHeight( height );
+			}
+
+			if ( cells ) {
+				cells = cells.split( ';' );
+				for ( var i in cells ) {
+					coords = cells[ i ].split( ',' );
+					x = coords[0];
+					y = coords[1];
+					this.addCell( x, y );
+				}
+			}
+
+			if ( ants ) {
+				ants = ants.split( ';' );
+				for ( var i in ants ) {
+					coords = ants[ i ].split( ',' );
+					x = coords[0];
+					y = coords[1];
+					this.addAnt( x, y );
+				}
+			}
+
+			if ( zoom ) {
+				this.setCellSize( zoom );
+			}
+
+			if ( grid ) {
+				this.grid = true;
+			}
+
+			this.refill();
 		};
 
 		/* Getters */
@@ -499,6 +441,16 @@ var Formicarium = {
 		};
 
 		/* Setters */
+
+		this.setCellCounter = function ( value ) {
+			this.cellCounter = value;
+			this.gui.cellCounter.text( mw.message( 'cell-counter' ) + value );
+		};
+
+		this.setAntCounter = function ( value ) {
+			this.antCounter = value;
+			this.gui.antCounter.text( mw.message( 'ant-counter' ) + value );
+		};
 
 		this.setWidth = function ( value ) {
 			this.width = parseInt( value );
@@ -639,16 +591,85 @@ var Formicarium = {
 		};
 
 		this.addAnt = function ( x, y ) {
-			var ant = new Formicarium.Ant( this, x, y );
+			var x = parseInt( x ),
+				y = parseInt( y ),
+				ant = new Formicarium.Ant( this, x, y );
 			this.ants.push( ant );
 			this.setAntCounter( this.antCounter + 1 );
 		};
 
 		this.removeAnt = function ( x, y ) {
-			var ant = this.getAnt( x, y ),
+			var x = parseInt( x ),
+				y = parseInt( y ),
+				ant = this.getAnt( x, y ),
 				index = this.ants.indexOf( ant );
 			this.ants.splice( index, 1 );
 			this.setAntCounter( this.antCounter - 1 );
+		};
+	},
+
+	Game: function ( board ) {
+
+		this.board = board;
+
+		this.playing = false;
+
+		this.generationCounter = 0;
+
+		/* Setters */
+
+		this.setGenerationCounter = function ( value ) {
+			this.generationCounter = value;
+			this.board.gui.generationCounter.text( mw.message( 'generation-counter' ) + value );
+		};
+
+		/* Actions */
+
+		this.previousGeneration = function () {
+			this.board.oldCells = this.board.cells.slice(); // Clone the array
+			for ( var i in this.board.ants ) {
+				this.board.ants[ i ].undoRoutine();
+			}
+			this.board.refill();
+			this.setGenerationCounter( this.generationCounter - 1 );
+		};
+
+		this.nextGeneration = function () {
+			this.board.oldCells = this.board.cells.slice(); // Clone the array
+			for ( var i in this.board.ants ) {
+				this.board.ants[ i ].doRoutine();
+			}
+			this.board.refill();
+			this.setGenerationCounter( this.generationCounter + 1 );
+		};
+
+		this.reset = function () {
+			// Reset the board
+			this.board.init();
+
+			// Reset the game
+			this.pause();
+			this.setGenerationCounter( 0 );
+		};
+
+		this.play = function () {
+			if ( this.playing ) {
+				return; // The game is already playing
+			}
+			var game = this;
+			this.playing = setInterval( function () { game.nextGeneration(); }, 1 ); // The interval id is stored in the playing property
+			this.board.gui.playButton.hide();
+			this.board.gui.pauseButton.show();
+		};
+
+		this.pause = function () {
+			if ( !this.playing ) {
+				return; // The game is already paused
+			}
+			clearInterval( this.playing );
+			this.playing = false;
+			this.board.gui.playButton.show();
+			this.board.gui.pauseButton.hide();
 		};
 	},
 
@@ -665,7 +686,7 @@ var Formicarium = {
 		this.newY = null;
 
 		this.state = null; // up or down
-		this.drag = false;
+		this.dragged = false;
 
 		/* Getters */
 
@@ -681,12 +702,12 @@ var Formicarium = {
 			return newY;
 		};
 
-		/* Events */
+		/* Event handlers */
 
 		this.up = function ( event ) {
 			this.state = 'up';
 
-			if ( !this.drag ) {
+			if ( !this.dragged ) {
 				var x = this.newX,
 					y = this.newY,
 					ant = this.board.getAnt( x, y );
@@ -697,7 +718,72 @@ var Formicarium = {
 				}
 				this.board.refill();
 			}
-			this.drag = false;
+			this.dragged = false;
+		};
+
+		this.move = function ( event ) {
+			if ( this.state === 'down' ) {
+
+				this.oldX = this.newX;
+				this.oldY = this.newY;
+				this.newX = this.getX( event );
+				this.newY = this.getY( event );
+
+				if ( this.newX !== this.oldX || this.newY !== this.oldY ) {
+
+					this.dragged = true;
+
+					this.board.centerX += this.oldX - this.newX;
+					this.board.centerY += this.oldY - this.newY;
+					this.board.refill();
+
+					// Bugfix: without the following, the board flickers when moving, not sure why
+					this.newX = this.getX( event );
+					this.newY = this.getY( event );
+				}
+			}
+		};
+
+		this.down = function ( event ) {
+			this.state = 'down';
+			this.newX = this.getX( event );
+			this.newY = this.getY( event );
+		};
+	},
+
+	Touch: function ( board ) {
+
+		this.board = board;
+
+		// The distance from the origin of the coordinate system in virtual pixels (not real ones)
+		this.newX = null;
+		this.newX = null;
+		this.oldX = null;
+		this.oldY = null;
+
+		this.moved = false;
+
+		/**
+		 * Getters
+		 */
+		this.getX = function ( event ) {
+			var offsetX = event.originalEvent.changedTouches[0].pageX - $( event.target ).offset().left,
+				newX = this.board.centerX - Math.floor( this.board.xCells / 2 ) + Math.floor( offsetX / this.board.cellSize );
+			return newX;
+		};
+
+		this.getY = function ( event ) {
+			var offsetY = event.originalEvent.changedTouches[0].pageY - $( event.target ).offset().top,
+				newY = this.board.centerY - Math.floor( this.board.yCells / 2 ) + Math.floor( offsetY / this.board.cellSize );
+			return newY;
+		};
+
+		/**
+		 * Event handlers
+		 */
+		this.start = function ( event ) {
+			this.newX = this.getX( event );
+			this.newY = this.getY( event );
 		};
 
 		this.move = function ( event ) {
@@ -706,24 +792,21 @@ var Formicarium = {
 			this.newX = this.getX( event );
 			this.newY = this.getY( event );
 
-			// If drag, not click
-			if ( this.state === 'down' && ( this.newX !== this.oldX || this.newY !== this.oldY ) ) {
-				this.drag = true;
+			this.board.centerX += this.oldX - this.newX;
+			this.board.centerY += this.oldY - this.newY;
+			this.board.refill();
 
-				this.board.centerX += this.oldX - this.newX;
-				this.board.centerY += this.oldY - this.newY;
-				this.board.refill();
-
-				// Bugfix: without the following, the board flickers when moving, not sure why
-				this.newX = this.getX( event );
-				this.newY = this.getY( event );
-			}
-		};
-
-		this.down = function ( event ) {
-			this.state = 'down';
+			// Bugfix: without the following, the board flickers when moving, not sure why
 			this.newX = this.getX( event );
 			this.newY = this.getY( event );
+
+			this.moved = true;
+
+			event.preventDefault();
+		};
+
+		this.end = function ( event ) {
+			this.moved = false;
 		};
 	},
 

@@ -5,7 +5,7 @@
 mw = {
 	config: {
 		get: function ( key ) {
-			return 'es'; // Manually change this if you want to test another language
+			return 'en'; // Manually change this if you want to test another language
 		}
 	},
 	messages: {
