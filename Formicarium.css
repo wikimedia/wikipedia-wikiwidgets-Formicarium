@@ -28,6 +28,7 @@
 	pointer-events: none;
 	position: absolute;
 	left: 5px;
+	text-shadow: 0 0 5px black;
 }
 
 .FormicariumGenerationCounter {

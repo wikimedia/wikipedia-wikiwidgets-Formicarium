@@ -9,9 +9,6 @@ None known!
 
 Tasks
 -----
-* Make buttons not selectable
-* Black border around counters
-* Reset button image
-* Mobile version
+* Responsive
 * Documentation
 * Ant skin?

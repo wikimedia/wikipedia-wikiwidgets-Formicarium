@@ -232,7 +232,7 @@ var Formicarium = {
 
 		this.resetButton = $( '<img>' ).attr({
 			'class': 'FormicariumButton FormicariumResetButton',
-			'src': '',
+			'src': '//upload.wikimedia.org/wikipedia/commons/0/0e/WikiWidgetResetButton.png',
 			'title': mw.message( 'reset-button-tooltip' ),
 			'alt': mw.message( 'reset-button' )
 		});
@@ -283,7 +283,7 @@ var Formicarium = {
 			this.cellCounter,
 			this.antCounter
 		);
-		this.wrapper.append( this.container );
+		this.wrapper.html( this.container );
 
 		this.bindEvents = function ( board, game, mouse, touch ) {
 
@@ -367,7 +367,7 @@ var Formicarium = {
 			}
 
 			if ( cells ) {
-				cells = cells.split( ';' );
+				cells = cells.replace( /\s/g, '' ).split( ';' );
 				for ( var i in cells ) {
 					coords = cells[ i ].split( ',' );
 					x = coords[0];
@@ -377,7 +377,7 @@ var Formicarium = {
 			}
 
 			if ( ants ) {
-				ants = ants.split( ';' );
+				ants = ants.replace( /\s/g, '' ).split( ';' );
 				for ( var i in ants ) {
 					coords = ants[ i ].split( ',' );
 					x = coords[0];
